@@ -1,0 +1,12 @@
+id,name,description,condition,reward,reward_type
+ach_001,初次创业,开设你的第一家店铺,shops>=1,1000,cash
+ach_002,连锁帝国,同时经营5家店铺,shops>=5,10000,cash
+ach_003,百万富翁,总资产突破100万元,cash>=1000000,unlock_golden_frame,unlock
+ach_004,压力山大,压力值首次达到满值,stress>=100,500,cash
+ach_005,健康达人,连续保持健康值90以上达52周,health_streak>=52,unlock_health_title,unlock
+ach_006,口碑王者,任意店铺评分达到5星,shop_rating>=5,5000,cash
+ach_007,铁人三项,一周内处理3个紧急事件,weekly_events>=3,2000,cash
+ach_008,十年老店,单店经营满520周,shop_weeks>=520,unlock_legacy_shop,unlock
+ach_009,白手起家,从破产边缘东山再起,comeback==true,unlock_phoenix_title,unlock
+ach_010,传承者,将店铺传给下一代,inheritance==true,unlock_family_tree,unlock
+

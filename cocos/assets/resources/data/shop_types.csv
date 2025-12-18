@@ -1,0 +1,12 @@
+id,name,category,base_revenue,base_cost,base_customers,avg_spending,gross_margin,description
+shop_restaurant_noodle,面馆,restaurant,800,400,60,25,0.35,街边小面馆薄利多销
+shop_restaurant_hotpot,火锅店,restaurant,3000,1500,40,80,0.40,热闹的火锅店人均较高
+shop_restaurant_cafe,咖啡店,restaurant,1200,600,35,45,0.50,文艺咖啡厅利润率较高
+shop_restaurant_bbq,烧烤店,restaurant,2000,900,50,55,0.45,夜市烧烤店夜间营业
+shop_retail_grocery,便利店,retail,1500,900,100,20,0.25,24小时便利店客流稳定
+shop_retail_fruit,水果店,retail,1000,600,45,30,0.30,新鲜水果店损耗较大
+shop_retail_clothing,服装店,retail,2500,1200,20,150,0.55,时尚服装店利润可观
+shop_service_barber,理发店,service,800,300,25,40,0.60,社区理发店成本较低
+shop_service_massage,按摩店,service,2000,800,15,180,0.55,休闲按摩店客单价高
+shop_entertainment_net,网吧,entertainment,1800,1000,60,40,0.35,网吧设备投入较大
+

@@ -1,8 +1,8 @@
-location_id,name,rent_multiplier,traffic_multiplier,competition_base,stability,weekday_modifier,weekend_modifier,holiday_modifier,weather_sensitive,operating_hours,suitable_types,description
-mall,商场店,1.5,1.3,70,high,1.0,1.3,1.5,false,10:00-22:00,milk_tea|cafe|fast_food|bakery,人流稳定，租金高，有营业时间限制
-street,街边店,1.0,1.0,50,medium,1.0,1.1,1.2,true,自定义,all,灵活度高，受天气影响
-community,社区店,0.7,0.8,30,high,0.9,1.2,1.0,false,07:00-22:00,noodle|snack|fast_food|bakery,租金低，客群固定，复购率高
-office,写字楼,1.2,1.1,60,medium,1.3,0.5,0.3,false,07:00-20:00,cafe|fast_food|noodle,工作日好，周末差，客单价高
-school,学校周边,0.9,1.2,65,low,1.0,0.8,0.2,true,07:00-22:00,milk_tea|snack|fast_food,寒暑假冷清，学生消费力有限
-station,车站/地铁,1.4,1.4,75,medium,1.1,1.2,1.5,false,06:00-23:00,snack|fast_food|milk_tea,人流大但停留短，适合快餐
-scenic,景区/商圈,1.6,1.5,80,low,0.6,1.4,2.0,true,09:00-22:00,all,节假日爆发，平日冷清
+location_id,name,rent_multiplier,traffic_multiplier,competition_base,stability,weekday_modifier,weekend_modifier,holiday_modifier,weather_sensitive,operating_hours,suitable_types,core_spot_chance,poor_spot_chance,core_rent_mult,core_traffic_mult,poor_rent_mult,poor_traffic_mult,description
+mall,商场店,1.5,1.3,70,high,1.0,1.3,1.5,false,10:00-22:00,milk_tea|cafe|fast_food|bakery,0.35,0.15,1.25,1.25,0.85,0.75,人流稳定，租金高，有营业时间限制
+street,街边店,1.0,1.0,50,medium,1.0,1.1,1.2,true,自定义,all,0.25,0.25,1.15,1.20,0.85,0.80,灵活度高，受天气影响
+community,社区店,0.7,0.8,30,high,0.9,1.2,1.0,false,07:00-22:00,noodle|snack|fast_food|bakery,0.20,0.20,1.10,1.15,0.90,0.85,租金低，客群固定，复购率高
+office,写字楼,1.2,1.1,60,medium,1.3,0.5,0.3,false,07:00-20:00,cafe|fast_food|noodle,0.30,0.20,1.20,1.20,0.90,0.80,工作日好，周末差，客单价高
+school,学校周边,0.9,1.2,65,low,1.0,0.8,0.2,true,07:00-22:00,milk_tea|snack|fast_food,0.20,0.30,1.10,1.15,0.85,0.75,寒暑假冷清，学生消费力有限
+station,车站/地铁,1.4,1.4,75,medium,1.1,1.2,1.5,false,06:00-23:00,snack|fast_food|milk_tea,0.40,0.20,1.25,1.25,0.85,0.75,人流大但停留短，适合快餐
+scenic,景区/商圈,1.6,1.5,80,low,0.6,1.4,2.0,true,09:00-22:00,all,0.30,0.30,1.25,1.30,0.85,0.70,节假日爆发，平日冷清

@@ -1,7 +1,9 @@
 {
-  "name": "NewProject",
+  "name": "shop-simulator",
   "uuid": "2bc0fa40-64b9-465a-ad87-c331e6ffe3c9",
   "creator": {
     "version": "3.8.8"
-  }
+  },
+  "description": "文字模拟经营小游戏 - 微信小游戏",
+  "author": "一哥"
 }
