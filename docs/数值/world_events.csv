@@ -1,0 +1,11 @@
+event_id,name,probability,scope,duration_min,duration_max,traffic_modifier,cost_modifier,special_effect,recovery_weeks,trigger_condition,description
+WE001,疫情爆发,0.005,global,8,24,dine_in-0.8|delivery+0.5,防疫+2000,forced_close_chance_0.3,4,week>20,堂食受限，外卖爆发
+WE002,地震,0.002,regional,2,8,-0.5,-0.3|repair+20000,shop_damage_chance_0.2,2,none,可能损坏店铺设备
+WE003,经济危机,0.01,global,24,104,-0.3,0,ticket_price-0.15,12,week>52,消费力整体下降
+WE004,食品安全丑闻,0.02,category,4,12,-0.5,0,category_trust-30,8,none,特定品类信任危机
+WE005,竞争对手入场,0.03,category,permanent,permanent,-0.15,0,competition_index+20,0,cash>200000,大品牌进入你的区域
+WE006,最低工资上调,0.02,global,permanent,permanent,0,labor+0.1,none,0,week>26,政策性成本上涨
+WE007,原材料危机,0.015,category,4,16,0,material+0.3,supply_unstable,4,none,供应链问题
+WE008,网红打卡潮,0.01,regional,2,8,+0.5,0,rating_boost+0.3,0,rating>4.0,你的店突然火了
+WE009,城市改造,0.008,location,8,24,-0.4,0,relocation_risk,0,location=street,周边施工影响生意
+WE010,外星人入侵,0.0001,global,1,4,-0.9,0,chaos_mode,1,week>100,彩蛋事件！世界大乱

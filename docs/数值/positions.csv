@@ -1,0 +1,8 @@
+position_id,name,salary_min,salary_max,skill_requirement,impact_quality,impact_service,impact_hygiene,impact_efficiency,can_manage,required_for,optional_for,description
+chef,厨师/调饮师,4000,12000,high,0.8,0.1,0.3,0.5,false,noodle|bbq|hotpot|bakery|fast_food,milk_tea|cafe|snack,核心岗位，影响出品质量
+barista,咖啡师,4500,10000,high,0.9,0.2,0.2,0.4,false,cafe,,咖啡店核心岗位
+waiter,服务员,3000,5000,low,0.1,0.9,0.2,0.3,false,hotpot|bbq,noodle|cafe|fast_food,影响服务评分和顾客体验
+cashier,收银员,3000,5000,low,0.0,0.5,0.1,0.6,false,,all,影响结账效率，可兼任
+cleaner,保洁,2500,4000,low,0.0,0.2,0.9,0.1,false,,all,影响卫生评分
+manager,店长,6000,15000,high,0.3,0.4,0.3,0.7,true,,all,可托管店铺，降低玩家压力
+delivery,配送员,4000,8000,medium,0.0,0.3,0.0,0.5,false,,all,自配送时需要

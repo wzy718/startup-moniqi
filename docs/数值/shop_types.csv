@@ -1,0 +1,9 @@
+type_id,name,startup_cost_min,startup_cost_max,daily_cost_base,revenue_potential,difficulty,gross_margin,avg_ticket_min,avg_ticket_max,min_staff,ideal_staff,min_area,ideal_area,season_effect,description
+milk_tea,奶茶店,80000,150000,300,high,low,0.65,12,25,2,4,15,40,summer+0.2,年轻人最爱，竞争激烈
+noodle,面馆,60000,120000,400,medium,medium,0.55,18,35,2,5,30,60,winter+0.1,刚需品类，稳定客群
+bbq,烧烤店,100000,200000,600,high,high,0.50,50,120,4,8,60,150,summer+0.3,夜宵王者，季节波动大
+cafe,咖啡店,120000,250000,350,medium_high,medium,0.70,25,50,2,5,40,100,none,文艺范，需要好选址
+snack,小吃店,30000,80000,200,low_medium,low,0.60,8,20,1,3,10,30,none,门槛低，流动性大
+hotpot,火锅店,150000,350000,800,high,high,0.55,80,150,6,12,100,250,winter+0.2,翻台率关键，资金要求高
+bakery,烘焙店,100000,200000,400,medium_high,medium_high,0.60,15,40,2,5,30,80,none,技术门槛，保质期短
+fast_food,快餐店,80000,180000,500,medium,medium,0.50,15,30,3,6,40,100,none,效率为王，标准化要求高

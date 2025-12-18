@@ -1,0 +1,16 @@
+# 通用忽略（仓库根目录）
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# 日志/临时
+*.log
+
+
+
+
+
