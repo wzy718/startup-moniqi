@@ -10,8 +10,6 @@ Desktop.ini
 # 日志/临时
 *.log
 
-# 嵌套的 git 仓库
-cocos/
 
 
 
