@@ -22,3 +22,9 @@ node_modules/
 # WebStorm
 #//////////////////////////
 .idea/
+
+#//////////////////////////
+# Extensions build output
+#//////////////////////////
+extensions/*/webpack-dist/
+extensions/*/dist/

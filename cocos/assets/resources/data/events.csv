@@ -10,3 +10,10 @@ evt_008,商业机会,有人找你合作一个新项目,story,cash>50000,0.3,choi
 evt_009,媒体采访,本地媒体想要采访你的创业故事,story,shops>=2,0.2,choice_017|choice_018
 evt_010,新年活动,新年即将到来可以举办促销活动,random,currentWeek%52>48,0.8,choice_019|choice_020
 
+
+
+
+
+
+
+

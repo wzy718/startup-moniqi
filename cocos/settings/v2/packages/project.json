@@ -1,6 +1,10 @@
 {
   "__version__": "1.0.6",
   "general": {
-    "startScene": "16533891-6ef2-4888-ba39-915824a5cdce"
+    "designResolution": {
+      "width": 750,
+      "height": 1334,
+      "fitWidth": false
+    }
   }
 }

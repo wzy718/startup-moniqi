@@ -20,3 +20,10 @@ choice_018,evt_009,低调拒绝,1.0,stress-3,,
 choice_019,evt_010,举办大型促销,0.7,cash+10000|stress+10,cash-5000|stress+15,cash>5000
 choice_020,evt_010,保持正常营业,1.0,cash+2000,,
 
+
+
+
+
+
+
+

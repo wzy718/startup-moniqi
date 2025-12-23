@@ -215,3 +215,10 @@ export class GameManager extends Component {
 }
 
 
+
+
+
+
+
+
+
