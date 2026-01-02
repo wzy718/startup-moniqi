@@ -218,7 +218,7 @@ export class Utils {
     ): (...args: Parameters<T>) => void {
         let timeout: ReturnType<typeof setTimeout> | null = null;
         
-        return function(...args: Parameters<T>) {
+        return function(this: any, ...args: Parameters<T>) {
             if (timeout) {
                 clearTimeout(timeout);
             }
@@ -240,7 +240,7 @@ export class Utils {
     ): (...args: Parameters<T>) => void {
         let lastRun = 0;
         
-        return function(...args: Parameters<T>) {
+        return function(this: any, ...args: Parameters<T>) {
             const now = Date.now();
             if (now - lastRun >= limit) {
                 lastRun = now;
@@ -285,6 +285,9 @@ export class Utils {
         return prefix + type + suffix;
     }
 }
+
+
+
 
 
 

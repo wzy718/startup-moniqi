@@ -1,5 +1,6 @@
 import { _decorator, Component, sys, director } from 'cc';
 import { GameOverReason, PersonalityType, INITIAL_CASH, INITIAL_AGE, INITIAL_STRESS, INITIAL_HEALTH, INITIAL_ENERGY, INITIAL_REPUTATION } from './GameConstants';
+import { FinanceUtils, LoanSaveData } from '../utils/FinanceUtils';
 
 const { ccclass, property } = _decorator;
 
@@ -25,6 +26,8 @@ export interface ShopSaveData {
 export interface PlayerSaveData {
     cash: number;
     debt: number;
+    /** 等额本息贷款列表（存档值） */
+    loans: LoanSaveData[];
     age: number;
     stress: number;
     health: number;
@@ -33,6 +36,8 @@ export interface PlayerSaveData {
     personality: PersonalityType;
     currentWeek: number;
     totalWeeks: number;
+    /** 本次交互/本周触发的“需要结算的周数”（0 表示默认 1 周） */
+    pendingAdvanceWeeks: number;
     shops: ShopSaveData[];
     completedEvents: string[];
     unlockedAchievements: string[];
@@ -161,6 +166,7 @@ export class SaveManager extends Component {
         const defaultPlayer: PlayerSaveData = {
             cash: INITIAL_CASH,
             debt: 0,
+            loans: [],
             age: INITIAL_AGE,
             stress: INITIAL_STRESS,
             health: INITIAL_HEALTH,
@@ -169,6 +175,7 @@ export class SaveManager extends Component {
             personality: PersonalityType.BALANCED,
             currentWeek: 1,
             totalWeeks: 0,
+            pendingAdvanceWeeks: 0,
             shops: [],
             completedEvents: [],
             unlockedAchievements: [],
@@ -239,6 +246,7 @@ export class SaveManager extends Component {
             
             // 版本兼容性检查
             if (this.checkVersionCompatibility(saveData.version)) {
+                this.ensureSaveDefaults(saveData);
                 this._currentSave = saveData;
                 console.log('[SaveManager] 存档加载成功');
                 return true;
@@ -266,6 +274,7 @@ export class SaveManager extends Component {
             const saveData = JSON.parse(saveString) as SaveData;
             
             if (this.checkVersionCompatibility(saveData.version)) {
+                this.ensureSaveDefaults(saveData);
                 this._currentSave = saveData;
                 console.log('[SaveManager] 自动存档加载成功');
                 return true;
@@ -288,6 +297,15 @@ export class SaveManager extends Component {
         const [major] = version.split('.');
         const [currentMajor] = SAVE_VERSION.split('.');
         return major === currentMajor;
+    }
+
+    /**
+     * 确保存档字段齐全（兼容旧存档）
+     */
+    private ensureSaveDefaults(saveData: SaveData): void {
+        const player = saveData.player as any;
+        if (!player.loans) player.loans = [];
+        if (player.pendingAdvanceWeeks === undefined) player.pendingAdvanceWeeks = 0;
     }
 
     /**
@@ -352,6 +370,25 @@ export class SaveManager extends Component {
     }
 
     /**
+     * 新增一笔等额本息贷款（事件侧使用）
+     * 注意：贷款发放属于融资，不计入营业收入统计；这里只更新现金/债务与 loans 列表。
+     */
+    public addLoan(principal: number, annualRate: number, termWeeks: number): string | null {
+        if (!this._currentSave) return null;
+
+        const principalInt = Math.max(0, Math.floor(principal));
+        if (principalInt <= 0) return null;
+
+        const loan = FinanceUtils.createLoan(principalInt, annualRate, termWeeks, this._currentSave.player.currentWeek);
+
+        this._currentSave.player.loans.push(loan as LoanSaveData);
+        this._currentSave.player.debt += principalInt;
+        this._currentSave.player.cash += principalInt;
+
+        return loan.id;
+    }
+
+    /**
      * 更新玩家属性
      * @param property 属性名
      * @param value 新值
@@ -368,7 +405,7 @@ export class SaveManager extends Component {
     public addCompletedEvent(eventId: string): void {
         if (!this._currentSave) return;
 
-        if (!this._currentSave.player.completedEvents.includes(eventId)) {
+        if (this._currentSave.player.completedEvents.indexOf(eventId) === -1) {
             this._currentSave.player.completedEvents.push(eventId);
             this._currentSave.player.statistics.totalEventsHandled++;
         }
@@ -381,7 +418,7 @@ export class SaveManager extends Component {
     public unlockAchievement(achievementId: string): boolean {
         if (!this._currentSave) return false;
 
-        if (!this._currentSave.player.unlockedAchievements.includes(achievementId)) {
+        if (this._currentSave.player.unlockedAchievements.indexOf(achievementId) === -1) {
             this._currentSave.player.unlockedAchievements.push(achievementId);
             console.log(`[SaveManager] 解锁成就: ${achievementId}`);
             return true;
@@ -402,6 +439,7 @@ export class SaveManager extends Component {
         }
     }
 }
+
 
 
 

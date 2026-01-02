@@ -110,7 +110,7 @@ export class EventManager extends Component {
      * @param callback 回调函数
      * @param target 目标对象
      */
-    public on(eventType: GameEventType | string, callback: Function, target?: any): void {
+    public on(eventType: GameEventType | string, callback: (...args: any[]) => void, target?: any): void {
         this._eventTarget.on(eventType, callback, target);
     }
 
@@ -120,7 +120,7 @@ export class EventManager extends Component {
      * @param callback 回调函数
      * @param target 目标对象
      */
-    public off(eventType: GameEventType | string, callback?: Function, target?: any): void {
+    public off(eventType: GameEventType | string, callback?: (...args: any[]) => void, target?: any): void {
         this._eventTarget.off(eventType, callback, target);
     }
 
@@ -130,7 +130,7 @@ export class EventManager extends Component {
      * @param callback 回调函数
      * @param target 目标对象
      */
-    public once(eventType: GameEventType | string, callback: Function, target?: any): void {
+    public once(eventType: GameEventType | string, callback: (...args: any[]) => void, target?: any): void {
         this._eventTarget.once(eventType, callback, target);
     }
 
@@ -152,7 +152,7 @@ export class EventManager extends Component {
         // 筛选可用事件
         const availableEvents = dataManager.filterEvents((event) => {
             // 排除已完成的一次性事件
-            if (playerData.completedEvents.includes(event.id)) {
+            if (playerData.completedEvents.indexOf(event.id) !== -1) {
                 return false;
             }
 
@@ -345,6 +345,26 @@ export class EventManager extends Component {
         const effectList = effects.split('|');
         
         for (const effect of effectList) {
+            // 1) 时间推进（一次交互可能推进多周）
+            // 格式：advance_weeks+3
+            const advanceMatch = effect.match(/^advance_weeks\+(\d+)$/);
+            if (advanceMatch) {
+                const weeks = Math.max(0, parseInt(advanceMatch[1], 10));
+                saveManager.playerData.pendingAdvanceWeeks = Math.max(saveManager.playerData.pendingAdvanceWeeks || 0, weeks);
+                continue;
+            }
+
+            // 2) 等额本息贷款
+            // 格式：loan+50000@0.12@52  => 本金 50000，年化 12%，期限 52 周
+            const loanMatch = effect.match(/^loan\+(\d+)(?:@(\d*\.?\d+))?(?:@(\d+))?$/);
+            if (loanMatch) {
+                const principal = Math.max(0, parseInt(loanMatch[1], 10));
+                const annualRate = loanMatch[2] !== undefined ? Math.max(0, parseFloat(loanMatch[2])) : 0.12;
+                const termWeeks = loanMatch[3] !== undefined ? Math.max(1, parseInt(loanMatch[3], 10)) : 52;
+                saveManager.addLoan(principal, annualRate, termWeeks);
+                continue;
+            }
+
             const match = effect.match(/(\w+)([+-])(\d+)/);
             if (!match) continue;
 
@@ -391,7 +411,7 @@ export class EventManager extends Component {
 
         dataManager.worldEvents.forEach((worldEvent) => {
             // 已经激活的事件跳过
-            if (this._activeWorldEvents.includes(worldEvent.id)) {
+            if (this._activeWorldEvents.indexOf(worldEvent.id) !== -1) {
                 return;
             }
 
@@ -427,6 +447,8 @@ export class EventManager extends Component {
         }
     }
 }
+
+
 
 
 

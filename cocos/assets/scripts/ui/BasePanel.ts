@@ -1,4 +1,5 @@
 import { _decorator, Component, Node } from 'cc';
+import { UIManager } from './UIManager';
 
 const { ccclass, property } = _decorator;
 
@@ -69,7 +70,6 @@ export class BasePanel extends Component {
         const panelName = this.constructor.name;
         
         // 通过 UIManager 关闭
-        const { UIManager } = require('./UIManager');
         UIManager.instance?.hidePanel(panelName);
     }
 
@@ -106,6 +106,9 @@ export class BasePanel extends Component {
         return current;
     }
 }
+
+
+
 
 
 

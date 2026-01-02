@@ -2,12 +2,12 @@ import { _decorator, Component, director } from 'cc';
 import { GameManager } from './GameManager';
 import { SaveManager } from './SaveManager';
 import { EventManager, GameEventType } from './EventManager';
+import { FinanceUtils } from '../utils/FinanceUtils';
 import { 
     GameState, 
     GameOverReason, 
     WEEKS_PER_MONTH, 
     WEEKLY_LIVING_COST, 
-    DEBT_INTEREST_RATE,
     MAX_STRESS,
     STRESS_DEATH_WEEKS,
     MAX_AGE,
@@ -28,8 +28,12 @@ export interface TurnSettlementResult {
     weeklyProfit: number;
     /** 生活费 */
     livingCost: number;
-    /** 债务利息 */
-    debtInterest: number;
+    /** 本周贷款总还款额（含利息） */
+    loanPayment: number;
+    /** 本周贷款利息 */
+    loanInterest: number;
+    /** 本周贷款本金 */
+    loanPrincipal: number;
     /** 净现金流 */
     netCashFlow: number;
     /** 压力变化 */
@@ -38,6 +42,8 @@ export interface TurnSettlementResult {
     healthChange: number;
     /** 结算后现金 */
     finalCash: number;
+    /** 结算后总负债（剩余本金） */
+    finalDebt: number;
 }
 
 /**
@@ -92,6 +98,9 @@ export class TurnManager extends Component {
 
         console.log(`[TurnManager] ========== 第 ${saveManager.playerData.currentWeek} 周开始 ==========`);
 
+        // 本次交互开始时清空“跳周请求”（世界事件/选择可重新写入）
+        saveManager.playerData.pendingAdvanceWeeks = 0;
+
         // 发送回合开始事件
         eventManager.emit(GameEventType.TURN_START, { week: saveManager.playerData.currentWeek });
 
@@ -102,7 +111,14 @@ export class TurnManager extends Component {
         console.log('[TurnManager] 阶段2: 检查世界事件');
         eventManager.checkWorldEvents();
 
-        // 3. 生成事件候选并抽取
+        // 世界事件可能触发“跳周”（例如世界大战直接推进 1 年）
+        if (saveManager.playerData.pendingAdvanceWeeks > 0) {
+            console.log(`[TurnManager] 本周触发跳周：将结算 ${saveManager.playerData.pendingAdvanceWeeks} 周（无额外交互事件）`);
+            await this.continueAfterEvent();
+            return;
+        }
+
+        // 3. 生成事件候选并抽取（每次交互仅 1 个事件）
         console.log('[TurnManager] 阶段3: 抽取事件');
         const event = eventManager.drawEvent();
         
@@ -134,48 +150,58 @@ export class TurnManager extends Component {
             return;
         }
 
-        // 4. 经营结算
-        console.log('[TurnManager] 阶段4: 经营结算');
-        const businessResult = this.calculateBusinessSettlement();
+        const weeksToSettle = saveManager.playerData.pendingAdvanceWeeks > 0 ? saveManager.playerData.pendingAdvanceWeeks : 1;
+        saveManager.playerData.pendingAdvanceWeeks = 0;
 
-        // 5. 玩家结算
-        console.log('[TurnManager] 阶段5: 玩家结算');
-        const playerResult = this.calculatePlayerSettlement(businessResult);
+        for (let i = 0; i < weeksToSettle; i++) {
+            const settledWeek = saveManager.playerData.currentWeek;
+            console.log(`[TurnManager] ===== 开始结算：第 ${settledWeek} 周（第 ${i + 1}/${weeksToSettle} 次）=====`);
 
-        // 6. 状态结算
-        console.log('[TurnManager] 阶段6: 状态结算');
-        this.updatePlayerStatus();
+            // 4. 经营结算
+            console.log('[TurnManager] 阶段4: 经营结算');
+            const businessResult = this.calculateBusinessSettlement();
 
-        // 保存结算结果
-        this._lastSettlement = playerResult;
+            // 5. 玩家结算（含等额本息扣款）
+            console.log('[TurnManager] 阶段5: 玩家结算');
+            const playerResult = this.calculatePlayerSettlement(businessResult);
 
-        // 7. 时间推进
-        console.log('[TurnManager] 阶段7: 时间推进');
-        this.advanceTime();
+            // 6. 状态结算
+            console.log('[TurnManager] 阶段6: 状态结算');
+            this.updatePlayerStatus();
 
-        // 8. 死亡/破产判定
-        console.log('[TurnManager] 阶段8: 死亡/破产判定');
-        const gameOverReason = this.checkGameOver();
+            // 保存结算结果（保留最后一周结果供 UI 展示）
+            this._lastSettlement = playerResult;
 
-        if (gameOverReason) {
-            console.log(`[TurnManager] 游戏结束: ${gameOverReason}`);
-            gameManager.gameOver(gameOverReason);
-            return;
+            // 7. 时间推进（每次结算推进 1 周）
+            console.log('[TurnManager] 阶段7: 时间推进');
+            this.advanceTime();
+
+            // 8. 死亡/破产判定
+            console.log('[TurnManager] 阶段8: 死亡/破产判定');
+            const gameOverReason = this.checkGameOver();
+            if (gameOverReason) {
+                console.log(`[TurnManager] 游戏结束: ${gameOverReason}`);
+                gameManager.gameOver(gameOverReason);
+                return;
+            }
+
+            // 自动保存
+            saveManager.autoSave();
+
+            // 发送回合结束事件（对齐“刚结算的周”）
+            eventManager.emit(GameEventType.TURN_END, { 
+                week: settledWeek,
+                settlement: this._lastSettlement,
+                isAutoAdvance: weeksToSettle > 1,
+                autoAdvanceIndex: i + 1,
+                autoAdvanceTotal: weeksToSettle
+            });
+
+            console.log(`[TurnManager] ===== 第 ${settledWeek} 周结算完成 =====`);
         }
-
-        // 自动保存
-        saveManager.autoSave();
-
-        // 发送回合结束事件
-        eventManager.emit(GameEventType.TURN_END, { 
-            week: saveManager.playerData.currentWeek,
-            settlement: this._lastSettlement
-        });
 
         // 回到游戏状态
         gameManager.changeState(GameState.PLAYING);
-
-        console.log(`[TurnManager] ========== 第 ${saveManager.playerData.currentWeek - 1} 周结束 ==========`);
     }
 
     /**
@@ -212,38 +238,73 @@ export class TurnManager extends Component {
         const saveManager = SaveManager.instance;
         const playerData = saveManager.playerData!;
 
-        // 计算债务利息
-        const debtInterest = Math.floor(playerData.debt * DEBT_INTEREST_RATE);
-        
         // 计算生活费
         const livingCost = WEEKLY_LIVING_COST;
 
+        // 处理等额本息贷款扣款（每周固定还款额）
+        const loanSettlement = this.settleLoansForWeek();
+
         // 计算净现金流
-        const netCashFlow = businessResult.profit - livingCost - debtInterest;
+        const netCashFlow = businessResult.profit - livingCost - loanSettlement.paymentTotal;
 
         // 更新现金
         saveManager.updateCash(netCashFlow);
-
-        // 如果有债务，增加利息
-        if (playerData.debt > 0) {
-            playerData.debt += debtInterest;
-        }
 
         const result: TurnSettlementResult = {
             weeklyRevenue: businessResult.revenue,
             weeklyCost: businessResult.cost,
             weeklyProfit: businessResult.profit,
             livingCost: livingCost,
-            debtInterest: debtInterest,
+            loanPayment: loanSettlement.paymentTotal,
+            loanInterest: loanSettlement.interestTotal,
+            loanPrincipal: loanSettlement.principalTotal,
             netCashFlow: netCashFlow,
             stressChange: 0,  // 在状态结算中更新
             healthChange: 0,  // 在状态结算中更新
-            finalCash: playerData.cash
+            finalCash: playerData.cash,
+            finalDebt: playerData.debt
         };
 
         console.log(`[TurnManager] 玩家结算 - 净现金流: ${netCashFlow}, 最终现金: ${playerData.cash}`);
 
         return result;
+    }
+
+    /**
+     * 结算本周的贷款扣款
+     * 返回合计的“总扣款/利息/本金”，并同步更新 playerData.loans 与 playerData.debt（剩余本金）
+     */
+    private settleLoansForWeek(): { paymentTotal: number; interestTotal: number; principalTotal: number } {
+        const saveManager = SaveManager.instance;
+        const playerData = saveManager.playerData!;
+
+        if (!playerData.loans || playerData.loans.length === 0) {
+            return { paymentTotal: 0, interestTotal: 0, principalTotal: 0 };
+        }
+
+        let paymentTotal = 0;
+        let interestTotal = 0;
+        let principalTotal = 0;
+
+        // 倒序遍历，便于结清时移除
+        for (let i = playerData.loans.length - 1; i >= 0; i--) {
+            const loan = playerData.loans[i];
+            const payment = FinanceUtils.applyWeeklyPayment(loan);
+
+            paymentTotal += payment.payment;
+            interestTotal += payment.interest;
+            principalTotal += payment.principal;
+
+            // debt 口径：剩余本金之和（因此只用本金部分减少）
+            playerData.debt = Math.max(0, playerData.debt - payment.principal);
+
+            // 结清则移除
+            if (payment.isSettled) {
+                playerData.loans.splice(i, 1);
+            }
+        }
+
+        return { paymentTotal, interestTotal, principalTotal };
     }
 
     /**
@@ -333,7 +394,7 @@ export class TurnManager extends Component {
         const playerData = saveManager.playerData!;
 
         // 1. 破产判定
-        if (playerData.cash <= BANKRUPTCY_THRESHOLD && playerData.debt > 0) {
+        if (playerData.cash <= BANKRUPTCY_THRESHOLD) {
             return GameOverReason.BANKRUPTCY;
         }
 
@@ -392,6 +453,9 @@ export class TurnManager extends Component {
         }
     }
 }
+
+
+
 
 
 

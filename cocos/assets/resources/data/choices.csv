@@ -11,7 +11,7 @@ choice_009,evt_005,卖掉这些物品,1.0,cash+3000,,
 choice_010,evt_005,留作纪念,1.0,stress-5,,
 choice_011,evt_006,借给朋友,0.7,reputation+10|cash-5000,cash-5000|reputation-5,cash>5000
 choice_012,evt_006,婉言拒绝,1.0,stress+5|reputation-3,,
-choice_013,evt_007,去医院检查,1.0,cash-1000|health+10|stress-5,,cash>1000
+choice_013,evt_007,去医院检查,1.0,cash-1000|health+10|stress-5|advance_weeks+3,,cash>1000
 choice_014,evt_007,先忍一忍,0.5,cash+0,health-15|stress+10,
 choice_015,evt_008,接受合作,0.6,cash+20000|reputation+10,cash-10000|stress+20,cash>10000
 choice_016,evt_008,谨慎拒绝,1.0,stress+3,,
@@ -19,6 +19,9 @@ choice_017,evt_009,接受采访,0.8,reputation+15|stress+5,reputation-5,
 choice_018,evt_009,低调拒绝,1.0,stress-3,,
 choice_019,evt_010,举办大型促销,0.7,cash+10000|stress+10,cash-5000|stress+15,cash>5000
 choice_020,evt_010,保持正常营业,1.0,cash+2000,,
+choice_021,evt_003,向银行申请贷款周转,1.0,loan+50000@0.12@52|stress+3,,
+
+
 
 
 

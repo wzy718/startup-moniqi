@@ -66,7 +66,7 @@ export class PlayerModel {
 
     /** 是否破产 */
     public get isBankrupt(): boolean {
-        return this._cash <= 0 && this._debt > 0;
+        return this._cash <= 0;
     }
 
     /** 是否高压力 */
@@ -316,6 +316,9 @@ export class PlayerModel {
         return prefix + Math.abs(nw).toLocaleString('zh-CN') + ' 元';
     }
 }
+
+
+
 
 
 

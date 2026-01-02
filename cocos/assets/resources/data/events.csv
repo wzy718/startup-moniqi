@@ -1,7 +1,7 @@
 id,name,description,type,conditions,weight,choices
 evt_001,顾客投诉,有顾客对服务不满意并要求退款,shop,,1,choice_001|choice_002
 evt_002,设备故障,店里的主要设备突然坏了,shop,shops>=1,0.8,choice_003|choice_004
-evt_003,房东涨租,房东通知下个月要涨房租,shop,shops>=1|currentWeek>=12,0.5,choice_005|choice_006
+evt_003,房东涨租,房东通知下个月要涨房租,shop,shops>=1|currentWeek>=12,0.5,choice_005|choice_006|choice_021
 evt_004,员工请假,核心员工突然请假一周,shop,shops>=1,0.7,choice_007|choice_008
 evt_005,意外收获,在整理仓库时发现了一些值钱的旧物品,random,,0.3,choice_009|choice_010
 evt_006,朋友借钱,老朋友找你借钱周转,personal,,0.4,choice_011|choice_012
@@ -9,6 +9,9 @@ evt_007,健康检查,感觉身体有些不适需要去医院检查,personal,heal
 evt_008,商业机会,有人找你合作一个新项目,story,cash>50000,0.3,choice_015|choice_016
 evt_009,媒体采访,本地媒体想要采访你的创业故事,story,shops>=2,0.2,choice_017|choice_018
 evt_010,新年活动,新年即将到来可以举办促销活动,random,currentWeek%52>48,0.8,choice_019|choice_020
+
+
+
 
 
 
