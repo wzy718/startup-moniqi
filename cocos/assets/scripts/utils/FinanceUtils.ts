@@ -45,6 +45,14 @@ export interface LoanWeeklyPaymentResult {
  */
 export class FinanceUtils {
     /**
+     * 计算贷款列表的总剩余本金（用于同步 player.debt 的展示口径）
+     */
+    public static sumRemainingPrincipal(loans: LoanSaveData[] | null | undefined): number {
+        if (!loans || loans.length === 0) return 0;
+        return loans.reduce((sum, loan) => sum + Math.max(0, Math.floor(loan.remainingPrincipal)), 0);
+    }
+
+    /**
      * 计算等额本息每周还款额（整数）
      * 说明：
      * - 金额统一按“元整数”存储

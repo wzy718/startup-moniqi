@@ -100,6 +100,8 @@ export class TurnManager extends Component {
 
         // 本次交互开始时清空“跳周请求”（世界事件/选择可重新写入）
         saveManager.playerData.pendingAdvanceWeeks = 0;
+        // 统一口径：每次回合开始先同步 debt（展示/条件判断用），避免 loans 与 debt 不一致
+        saveManager.syncDebtFromLoans();
 
         // 发送回合开始事件
         eventManager.emit(GameEventType.TURN_START, { week: saveManager.playerData.currentWeek });
@@ -295,15 +297,14 @@ export class TurnManager extends Component {
             interestTotal += payment.interest;
             principalTotal += payment.principal;
 
-            // debt 口径：剩余本金之和（因此只用本金部分减少）
-            playerData.debt = Math.max(0, playerData.debt - payment.principal);
-
             // 结清则移除
             if (payment.isSettled) {
                 playerData.loans.splice(i, 1);
             }
         }
 
+        // debt 口径：贷款剩余本金之和（派生缓存）
+        saveManager.syncDebtFromLoans();
         return { paymentTotal, interestTotal, principalTotal };
     }
 
@@ -453,7 +454,6 @@ export class TurnManager extends Component {
         }
     }
 }
-
 
 
 

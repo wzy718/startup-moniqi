@@ -306,6 +306,8 @@ export class SaveManager extends Component {
         const player = saveData.player as any;
         if (!player.loans) player.loans = [];
         if (player.pendingAdvanceWeeks === undefined) player.pendingAdvanceWeeks = 0;
+        // 统一口径：debt 仅用于展示/条件判断的派生缓存，真实来源是 loans[].remainingPrincipal
+        player.debt = FinanceUtils.sumRemainingPrincipal(player.loans);
     }
 
     /**
@@ -370,6 +372,15 @@ export class SaveManager extends Component {
     }
 
     /**
+     * 同步 debt 展示口径（由 loans[] 计算）
+     * 注意：debt 不应被业务逻辑当作“单一真相来源”，真实负债来源是 loans[]。
+     */
+    public syncDebtFromLoans(): void {
+        if (!this._currentSave) return;
+        this._currentSave.player.debt = FinanceUtils.sumRemainingPrincipal(this._currentSave.player.loans);
+    }
+
+    /**
      * 新增一笔等额本息贷款（事件侧使用）
      * 注意：贷款发放属于融资，不计入营业收入统计；这里只更新现金/债务与 loans 列表。
      */
@@ -382,8 +393,8 @@ export class SaveManager extends Component {
         const loan = FinanceUtils.createLoan(principalInt, annualRate, termWeeks, this._currentSave.player.currentWeek);
 
         this._currentSave.player.loans.push(loan as LoanSaveData);
-        this._currentSave.player.debt += principalInt;
         this._currentSave.player.cash += principalInt;
+        this.syncDebtFromLoans();
 
         return loan.id;
     }
@@ -439,7 +450,6 @@ export class SaveManager extends Component {
         }
     }
 }
-
 
 
 

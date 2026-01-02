@@ -392,7 +392,9 @@ export class EventManager extends Component {
                     saveManager.playerData.reputation = Math.max(0, Math.min(100, saveManager.playerData.reputation + change));
                     break;
                 case 'debt':
-                    saveManager.playerData.debt += change;
+                    // 统一口径：debt 由 loans[] 派生同步；事件层不允许直接改 debt，避免出现“双轨负债”。
+                    // 如需新增负债，请用 loan+本金@年化@期限；如需影响现金，请用 cash+/-。
+                    console.warn(`[EventManager] 已忽略效果字段 debt（${change}），请改用 loan+/cash+ 组合表达`);
                     break;
             }
         }
@@ -447,7 +449,6 @@ export class EventManager extends Component {
         }
     }
 }
-
 
 
 

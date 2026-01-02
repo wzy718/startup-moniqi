@@ -1,5 +1,5 @@
 achievement_id,name,description,condition_type,condition_value,reward_type,reward_value,hidden,tier,icon
-A001,第一桶金,首次实现单周盈利,weekly_profit,>0,unlock,new_game_mode,false,bronze,💰
+A001,第一桶金,首次实现单周盈利,player_weekly_profit_total,>0,unlock,new_game_mode,false,bronze,💰
 A002,站稳脚跟,连续盈利4周,profit_streak,4,cash,5000,false,bronze,🦶
 A003,小有积蓄,现金突破10万,cash,100000,title,小老板,false,bronze,💵
 A004,初具规模,现金突破50万,cash,500000,unlock,second_shop,false,silver,🏪
