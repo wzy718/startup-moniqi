@@ -6,7 +6,8 @@ import { FinanceUtils } from '../utils/FinanceUtils';
 import { 
     GameState, 
     GameOverReason, 
-    WEEKS_PER_MONTH, 
+    WEEKS_PER_MONTH,
+    WEEKS_PER_YEAR, 
     WEEKLY_LIVING_COST, 
     MAX_STRESS,
     STRESS_DEATH_WEEKS,
@@ -377,8 +378,8 @@ export class TurnManager extends Component {
         playerData.currentWeek++;
         playerData.totalWeeks++;
 
-        // 每52周增加一岁
-        if (playerData.currentWeek % 52 === 0) {
+        // 每48周增加一岁（游戏口径：1年 = 12个月 = 48周）
+        if (playerData.currentWeek % WEEKS_PER_YEAR === 0) {
             playerData.age++;
             console.log(`[TurnManager] 年龄增长: ${playerData.age} 岁`);
         }
@@ -435,10 +436,10 @@ export class TurnManager extends Component {
     }
 
     /**
-     * 获取当前年份
+     * 获取当前年份（游戏口径：1年 = 48周）
      */
     public getCurrentYear(): number {
-        return Math.floor(this.getCurrentWeek() / 52) + 1;
+        return Math.floor(this.getCurrentWeek() / WEEKS_PER_YEAR) + 1;
     }
 
     /**
@@ -454,6 +455,8 @@ export class TurnManager extends Component {
         }
     }
 }
+
+
 
 
 

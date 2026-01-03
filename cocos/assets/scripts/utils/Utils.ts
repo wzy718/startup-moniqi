@@ -1,3 +1,5 @@
+import { WEEKS_PER_YEAR, WEEKS_PER_MONTH } from '../core/GameConstants';
+
 /**
  * 通用工具类
  * 包含各种实用工具函数
@@ -52,13 +54,13 @@ export class Utils {
     /**
      * 格式化周数为可读字符串
      * @param weeks 周数
-     * @returns "第X年第X月第X周"格式
+     * @returns "第X年第X月第X周"格式（游戏口径：1年 = 48周，1月 = 4周）
      */
     public static formatWeeks(weeks: number): string {
-        const year = Math.floor((weeks - 1) / 52) + 1;
-        const weekInYear = ((weeks - 1) % 52) + 1;
-        const month = Math.ceil(weekInYear / 4);
-        const weekInMonth = ((weekInYear - 1) % 4) + 1;
+        const year = Math.floor((weeks - 1) / WEEKS_PER_YEAR) + 1;
+        const weekInYear = ((weeks - 1) % WEEKS_PER_YEAR) + 1;
+        const month = Math.ceil(weekInYear / WEEKS_PER_MONTH);
+        const weekInMonth = ((weekInYear - 1) % WEEKS_PER_MONTH) + 1;
 
         return `第${year}年第${month}月第${weekInMonth}周`;
     }
@@ -285,6 +287,8 @@ export class Utils {
         return prefix + type + suffix;
     }
 }
+
+
 
 
 

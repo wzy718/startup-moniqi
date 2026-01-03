@@ -1,6 +1,7 @@
 import { _decorator, Component, director, EventTarget } from 'cc';
 import { DataManager, EventData, ChoiceData } from './DataManager';
 import { SaveManager } from './SaveManager';
+import { WEEKS_PER_YEAR } from './GameConstants';
 
 const { ccclass, property } = _decorator;
 
@@ -355,12 +356,12 @@ export class EventManager extends Component {
             }
 
             // 2) 等额本息贷款
-            // 格式：loan+50000@0.12@52  => 本金 50000，年化 12%，期限 52 周
+            // 格式：loan+50000@0.12@48  => 本金 50000，年化 12%，期限 48 周（游戏口径：1年 = 48周）
             const loanMatch = effect.match(/^loan\+(\d+)(?:@(\d*\.?\d+))?(?:@(\d+))?$/);
             if (loanMatch) {
                 const principal = Math.max(0, parseInt(loanMatch[1], 10));
                 const annualRate = loanMatch[2] !== undefined ? Math.max(0, parseFloat(loanMatch[2])) : 0.12;
-                const termWeeks = loanMatch[3] !== undefined ? Math.max(1, parseInt(loanMatch[3], 10)) : 52;
+                const termWeeks = loanMatch[3] !== undefined ? Math.max(1, parseInt(loanMatch[3], 10)) : WEEKS_PER_YEAR;
                 saveManager.addLoan(principal, annualRate, termWeeks);
                 continue;
             }
@@ -449,6 +450,8 @@ export class EventManager extends Component {
         }
     }
 }
+
+
 
 
 

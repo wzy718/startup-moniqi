@@ -5,7 +5,7 @@
 
 /** 时间相关常量 */
 export const WEEKS_PER_MONTH = 4;  // 每月周数（游戏口径）
-export const WEEKS_PER_YEAR = 52;  // 每年周数
+export const WEEKS_PER_YEAR = 48;  // 每年周数（游戏口径，12个月×4周）
 
 /** 玩家初始值 */
 export const INITIAL_CASH = 100000;       // 初始现金（元）
@@ -83,6 +83,8 @@ export enum EventType {
     SHOP = 'shop',                  // 店铺事件
     PERSONAL = 'personal'           // 个人事件
 }
+
+
 
 
 
