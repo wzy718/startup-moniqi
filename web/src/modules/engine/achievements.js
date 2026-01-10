@@ -139,7 +139,6 @@ function parsePercent(s) {
 
 function estimateShopValue(shop) {
   const p = Math.round(shop.lastWeekProfit || 0);
-  // 简化估值：近周利润 × 20（后续可替换为更严谨的估值模型）
+  // 简化估值：近月利润 × 20（后续可替换为更严谨的估值模型）
   return Math.max(0, p * 20);
 }
-

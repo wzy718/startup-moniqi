@@ -2,6 +2,8 @@
 
 目标：把 `docs/prd/demo/kd_sim_demo_v2_min_home_and_pages.html` 的 Demo 变成**可扩展、可先玩起来**的网页版本，后续主要通过补充 `docs/数值/*.csv` 来增加丰富度。
 
+时间口径：**1 回合 = 1 月**，**1 年 = 12 月**（事件每月 1 个）。
+
 ## 运行方式
 
 > 推荐在仓库根目录启动静态服务（避免浏览器 file:// 拦截 CSV 读取）。
@@ -23,7 +25,7 @@ python3 -m http.server 5173
 
 ## 目前已接入的表（新表头样例）
 
-- `docs/数值/events_new_schema_sample.csv`：每周事件（conditions/occurrence/权重规则）
+- `docs/数值/events_new_schema_sample.csv`：每月事件（conditions/occurrence/权重规则）
 - `docs/数值/choices_new_schema_sample.csv`：事件选项（resolution/outcomes 结构化效果）
 - `docs/数值/world_events.csv`：世界事件（概率触发、持续、多倍率叠加）
 - `docs/数值/achievements.csv`：成就（达成即自动领取奖励）

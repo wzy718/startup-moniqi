@@ -52,11 +52,20 @@ export function createNewGame({ playerName, mbtiId, shopTypeId, locationId }, da
       adsWatched: 0,
       wasBankruptOnce: false,
     },
-    stressMaxWeeks: 0,
+    stressMaxMonths: 0,
     achievementsUnlocked: {},
   };
 
   const shops = [createInitialShop({ shopTypeId, locationId }, data)];
+  const employees = createInitialEmployees(shops[0]?.id || "s1");
+  shops[0].staffCount = employees.filter((e) => e.shopId === shops[0].id).length;
+  const leaderboard = [
+    { rank: 1, name: "江城连锁", cash: 245000 },
+    { rank: 2, name: "巷口热干面", cash: 183000 },
+    { rank: 3, name: player.name, cash: player.cash },
+    { rank: 4, name: "夜市达人", cash: 92000 },
+  ];
+  const welfare = { dailyClaimed: false, skipTickets: 2 };
 
   return {
     version: GAME_STATE_VERSION,
@@ -71,6 +80,9 @@ export function createNewGame({ playerName, mbtiId, shopTypeId, locationId }, da
     pendingEventQueue: [],
     eventHistory: {},
     lastTurn: null,
+    employees,
+    leaderboard,
+    welfare,
     gameOver: false,
     gameOverReason: "",
   };
@@ -90,11 +102,25 @@ function createInitialShop({ shopTypeId, locationId }, data) {
     locationId: loc?.id || "street",
     operationMode: "normal",
     area: type?.ideal_area ?? 30,
-    staffCount: type?.ideal_staff ?? 2,
+    staffCount: 0,
     rating: 4.2,
     lastWeekProfit: 0,
     lastWeekRevenue: 0,
+    delivery: {
+      enabled: false,
+      budget: 1500,
+      feeRate: 0.2,
+      orders: 320,
+    },
   };
+}
+
+function createInitialEmployees(shopId) {
+  return [
+    { id: "e1", shopId, name: "小范", role: "店长", mood: "稳定", wage: 5200, risk: "—" },
+    { id: "e2", shopId, name: "阿明", role: "收银", mood: "紧张", wage: 3800, risk: "中" },
+    { id: "e3", shopId, name: "阿琳", role: "后厨", mood: "积极", wage: 4200, risk: "低" },
+  ];
 }
 
 export function loadSavedGame() {

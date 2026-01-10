@@ -1,4 +1,4 @@
-import { WEEKS_PER_MONTH, WEEKS_PER_YEAR, STRESS_DEATH_WEEKS } from "./constants.js";
+import { DAYS_PER_MONTH, MONTHS_PER_YEAR, STRESS_DEATH_MONTHS } from "./constants.js";
 import { clamp } from "../utils/parse.js";
 import { applyEffects } from "./effects.js";
 import { getWorldModifiersForShop, tickWorldEvents } from "./world.js";
@@ -6,7 +6,7 @@ import { estimateTotalAsset, evaluateAchievements } from "./achievements.js";
 import { syncStateAfterEffects } from "./sync.js";
 
 export function advanceWeek({ state, data, event, choice, choiceOutcome, rng }) {
-  const turnWeek = state.currentWeek;
+  const turnMonth = state.currentWeek;
 
   const before = snapshotPlayer(state);
   const applied = applyEffects(state, getOutcomeEffects(choice, choiceOutcome), {
@@ -35,7 +35,7 @@ export function advanceWeek({ state, data, event, choice, choiceOutcome, rng }) 
   // 时间推进
   state.currentWeek += 1;
   state.player.stats.weeksSurvived += 1;
-  if (state.currentWeek > 1 && (state.currentWeek - 1) % WEEKS_PER_YEAR === 0) {
+  if (state.currentWeek > 1 && (state.currentWeek - 1) % MONTHS_PER_YEAR === 0) {
     state.player.age += 1;
   }
 
@@ -55,7 +55,7 @@ export function advanceWeek({ state, data, event, choice, choiceOutcome, rng }) 
     state.gameOverReason = "破产：现金归零";
     state.player.stats.wasBankruptOnce = true;
   }
-  if (state.player.stress >= 100 && state.player.stressMaxWeeks >= STRESS_DEATH_WEEKS) {
+  if (state.player.stress >= 100 && state.player.stressMaxMonths >= STRESS_DEATH_MONTHS) {
     state.gameOver = true;
     state.gameOverReason = "崩溃：压力满值过久";
   }
@@ -64,7 +64,7 @@ export function advanceWeek({ state, data, event, choice, choiceOutcome, rng }) 
 
   const weeklyNetCashflow = Math.round(after.cash - before.cash);
   const summary = {
-    week: turnWeek,
+    week: turnMonth,
     eventId: event.id,
     eventTitle: event.title,
     choiceCode: choice.code,
@@ -85,10 +85,10 @@ export function advanceWeek({ state, data, event, choice, choiceOutcome, rng }) 
   state.lastTurn = summary;
   state.eventHistory[event.id] = {
     count: (state.eventHistory[event.id]?.count ?? 0) + 1,
-    lastWeek: turnWeek,
+    lastWeek: turnMonth,
   };
   state.timeline.push({
-    week: turnWeek,
+    week: turnMonth,
     title: `${event.title}（选 ${choice.code} · ${choiceOutcome.outcome === "success" ? "成功" : "失败"}）`,
     net: weeklyNetCashflow,
   });
@@ -124,7 +124,7 @@ function settleShops(state, data, rng) {
     const trafficMult = dineRatio * mods.dineInTrafficMult + delRatio * mods.deliveryTrafficMult;
 
     const dailyCustomers = Math.max(0, Math.round(dailyCustomersBase * trafficMult));
-    const weeklyCustomers = Math.round(dailyCustomers * 7);
+    const weeklyCustomers = Math.round(dailyCustomers * DAYS_PER_MONTH);
 
     const avgTicket = rollAvgTicket(type, rng) * mods.avgTicketMult;
     const revenue = Math.round(weeklyCustomers * avgTicket);
@@ -133,7 +133,7 @@ function settleShops(state, data, rng) {
     const cogs = Math.round(revenue * (1 - grossMargin) * mods.cogsCostMult);
 
     const weeklyRent = Math.round(estimateWeeklyRent(shop, type, loc));
-    const weeklyOpsCost = Math.round((type?.daily_cost_base ?? 0) * 7);
+    const weeklyOpsCost = Math.round((type?.daily_cost_base ?? 0) * DAYS_PER_MONTH);
     const weeklyLabor = Math.round((shop.staffCount || type?.ideal_staff || 2) * 1100 * mods.laborCostMult);
 
     const forcedClosed = rng.next() < mods.forcedCloseChance;
@@ -166,7 +166,7 @@ function estimateWeeklyRent(shop, type, loc) {
   const area = shop.area || type?.ideal_area || 30;
   const rentPerSqmMonthly = 200;
   const monthlyRent = Math.round(area * rentPerSqmMonthly * (loc?.rent_multiplier ?? 1));
-  return Math.floor(monthlyRent / WEEKS_PER_MONTH);
+  return Math.floor(monthlyRent);
 }
 
 function rollAvgTicket(type, rng) {
@@ -195,7 +195,7 @@ function settleLoans(state) {
     if (remaining <= 0) return false;
 
     const annualRate = Number(loan.annual_rate ?? 0);
-    const weeklyRate = annualRate / WEEKS_PER_YEAR;
+    const weeklyRate = annualRate / MONTHS_PER_YEAR;
     const interest = Math.floor(remaining * weeklyRate);
     const weeklyPayment = Math.max(0, Math.round(loan.weekly_payment ?? 0));
 
@@ -221,8 +221,8 @@ function settleStatus(state, data) {
   state.player.health = clamp(Math.round(state.player.health + 1), 0, 100);
   state.player.energy = clamp(Math.round(state.player.energy + 6), 0, 100);
 
-  if (state.player.stress >= 100) state.player.stressMaxWeeks += 1;
-  else state.player.stressMaxWeeks = 0;
+  if (state.player.stress >= 100) state.player.stressMaxMonths += 1;
+  else state.player.stressMaxMonths = 0;
 }
 
 function updateProfitStreak(state, shopProfitTotal) {

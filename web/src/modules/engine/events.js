@@ -128,8 +128,8 @@ function buildFallbackEvent() {
     schema: "builtin",
     id: "SYS_NOTHING",
     category: "system",
-    title: "本周无事发生",
-    description: "市场平稳的一周。你要选择更稳，还是更拼？",
+    title: "本月无事发生",
+    description: "市场平稳的一个月。你要选择更稳，还是更拼？",
     tags: [],
     baseWeight: 1,
     conditions: {

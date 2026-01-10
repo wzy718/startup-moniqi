@@ -1,6 +1,6 @@
 achievement_id,name,description,condition_type,condition_value,reward_type,reward_value,hidden,tier,icon
-A001,第一桶金,首次实现单周盈利,player_weekly_profit_total,>0,unlock,new_game_mode,false,bronze,💰
-A002,站稳脚跟,连续盈利4周,profit_streak,4,cash,5000,false,bronze,🦶
+A001,第一桶金,首次实现单月盈利,player_weekly_profit_total,>0,unlock,new_game_mode,false,bronze,💰
+A002,站稳脚跟,连续盈利4月,profit_streak,4,cash,5000,false,bronze,🦶
 A003,小有积蓄,现金突破10万,cash,100000,title,小老板,false,bronze,💵
 A004,初具规模,现金突破50万,cash,500000,unlock,second_shop,false,silver,🏪
 A005,百万富翁,现金突破100万,cash,1000000,title,百万富翁,false,gold,🤑
@@ -8,19 +8,19 @@ A006,千万身家,总资产突破1000万,total_asset,10000000,title,商业大亨
 A007,连锁起步,同时拥有2家店,shop_count,2,cash,20000,false,silver,🏬
 A008,连锁大亨,同时拥有5家店,shop_count,5,unlock,franchise_system,false,gold,🏢
 A009,餐饮帝国,同时拥有10家店,shop_count,10,title,餐饮帝国,false,diamond,🌆
-A010,一年老店,经营满52周,weeks_survived,52,cash,10000,false,bronze,📅
-A011,五年老字号,经营满260周,weeks_survived,260,title,老字号,false,silver,🏛️
-A012,十年传奇,经营满520周,weeks_survived,520,unlock,inheritance,false,gold,👑
+A010,一年老店,经营满12月,weeks_survived,12,cash,10000,false,bronze,📅
+A011,五年老字号,经营满60月,weeks_survived,60,title,老字号,false,silver,🏛️
+A012,十年传奇,经营满120月,weeks_survived,120,unlock,inheritance,false,gold,👑
 A013,子承父业,成功传承给下一代,inheritance_count,1,title,家族企业,false,gold,👨‍👧
 A014,三代同堂,传承到第三代,inheritance_count,3,title,百年老店,true,diamond,👴
 A015,浴火重生,破产后重新盈利,bankruptcy_recovery,true,title,不死鸟,false,silver,🔥
 A016,压力山大,压力值达到100并存活,max_stress_survived,100,cash,8000,true,bronze,😰
-A017,养生达人,健康值保持100达4周,health_streak,4,stress,-20,false,bronze,💪
+A017,养生达人,健康值保持100达4月,health_streak,4,stress,-20,false,bronze,💪
 A018,社交名流,声望达到100,reputation,100,hire_bonus,+20%,false,silver,🌟
 A019,五星好评,店铺评分达到5.0,shop_rating,5.0,traffic_bonus,+10%,false,gold,⭐
 A020,危机公关大师,成功处理3次舆情危机,crisis_handled,3,title,公关大师,true,silver,🎭
 A021,人才济济,雇佣超过20名员工,total_staff_hired,20,hire_cost,-20%,false,bronze,👥
-A022,铁杆粉丝,有员工在职超过104周,staff_tenure,104,loyalty_bonus,+10%,true,silver,🤝
+A022,铁杆粉丝,有员工在职超过24月,staff_tenure,24,loyalty_bonus,+10%,true,silver,🤝
 A023,全品类体验,经营过所有8种店铺类型,shop_types_tried,8,unlock,special_shop,true,gold,🎯
 A024,外星友人,遭遇外星人入侵并存活,alien_survived,true,title,星际商人,true,diamond,👽
 A025,氪金玩家,观看100次广告,ads_watched,100,ad_skip,50,true,bronze,📺

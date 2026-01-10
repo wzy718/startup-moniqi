@@ -215,6 +215,8 @@
       return sign + "¥ " + x.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
     };
     const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+    const randInt = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+    const genId = (prefix)=> `${prefix}_${Math.random().toString(36).slice(2,8)}`;
     const seasonOfWeek = (week)=> {
       const w = ((week-1)%52)+1;
       if (w<=13) return {name:"春", icon:"🌱"};
@@ -375,12 +377,12 @@
       const quickNav = [
         {id:"shops", e:"🏪", n:"店铺", t:"评分/利润", red:true},
         {id:"staff", e:"👥", n:"员工", t:"离职风险", red:true},
-        {id:"delivery", e:"🛵", n:"外卖", t:"预算/抽成"},
-        {id:"location", e:"🗺️", n:"选址", t:"门面刷新"},
+        {id:"delivery", e:"🛵", n:"外卖", t:"预算/抽成", red:true},
+        {id:"location", e:"🗺️", n:"选址", t:"门面刷新", red:true},
         {id:"world", e:"🌍", n:"世界事件", t:(s.world?.active?"持续中":"无")},
         {id:"ach", e:"🏆", n:"成就", t:"可领取", red:true},
-        {id:"rank", e:"📈", n:"排行榜", t:"财富榜"},
-        {id:"welfare", e:"🎁", n:"福利", t:"每日奖励"},
+        {id:"rank", e:"📈", n:"排行榜", t:"财富榜", red:true},
+        {id:"welfare", e:"🎁", n:"福利", t:"每日奖励", red:true},
       ];
 
       return `
@@ -522,10 +524,11 @@
         </div>
 
         <div class="card sec">
-          <div class="head"><h2>常用操作（Demo）</h2><div class="hint">占位</div></div>
+          <div class="head"><h2>常用操作（Demo）</h2><div class="hint">可用</div></div>
           <div class="pad" style="display:flex; flex-direction:column; gap:10px">
-            <button class="btn secondary" data-act="toast" data-msg="开新店流程（Demo）">开新店</button>
-            <button class="btn secondary" data-act="toast" data-msg="续约/装修（Demo）">续约 / 装修</button>
+            <button class="btn secondary" data-act="openShopCreate">开新店</button>
+            <button class="btn secondary" data-act="openShopClose">关店</button>
+            <button class="btn secondary" data-act="openShopRelocate">搬店 / 选址</button>
           </div>
         </div>
       `;
@@ -578,10 +581,12 @@
           </div>
         </div>
         <div class="card sec">
-          <div class="head"><h2>管理操作（Demo）</h2><div class="hint">占位</div></div>
+          <div class="head"><h2>管理操作（Demo）</h2><div class="hint">可用</div></div>
           <div class="pad" style="display:flex; flex-direction:column; gap:10px">
-            <button class="btn secondary" data-act="toast" data-msg="招聘流程（Demo）">招聘</button>
-            <button class="btn secondary" data-act="toast" data-msg="加薪/排班（Demo）">加薪 / 排班</button>
+            <button class="btn secondary" data-act="openHire">招聘</button>
+            <button class="btn secondary" data-act="openSchedule">排班</button>
+            <button class="btn secondary" data-act="openTraining">培训</button>
+            <button class="btn secondary" data-act="openFire">开除</button>
           </div>
         </div>
       `;
@@ -598,8 +603,10 @@
             <div class="row"><div><b>心情</b><span>影响效率/离职（占位）</span></div><div class="mono">${p.mood}</div></div>
             <div class="row"><div><b>工资</b><span>每周结算折算（占位）</span></div><div class="mono">${fmtMoney(p.wage).replace("¥ ","¥ ")}/月</div></div>
             <div class="row"><div><b>风险</b><span>触发事件可能性（占位）</span></div><div class="mono ${p.risk!=='—'?'warn':''}">${p.risk}</div></div>
-            <button class="btn secondary" data-act="toast" data-msg="谈话/安抚（Demo）">谈话/安抚</button>
-            <button class="btn secondary" data-act="toast" data-msg="调整排班（Demo）">调整排班</button>
+            <button class="btn secondary" data-act="empTalk" data-id="${p.id}">谈话/安抚</button>
+            <button class="btn secondary" data-act="empSchedule" data-id="${p.id}">调整排班</button>
+            <button class="btn secondary" data-act="empTrain" data-id="${p.id}">培训提升</button>
+            <button class="btn secondary" data-act="empFire" data-id="${p.id}">开除</button>
           </div>
         </div>
       `;
@@ -928,6 +935,13 @@
       }
       if(act==="openShop"){ setView("shop", {id: el.getAttribute('data-id')}); return; }
       if(act==="openEmp"){ setView("emp", {id: el.getAttribute('data-id')}); return; }
+      if(act==="openShopCreate"){ openShopCreateSheet(); return; }
+      if(act==="openShopClose"){ openShopCloseSheet(); return; }
+      if(act==="openShopRelocate"){ openShopRelocateSheet(); return; }
+      if(act==="openHire"){ openHireSheet(); return; }
+      if(act==="openSchedule"){ openScheduleSheet(); return; }
+      if(act==="openTraining"){ openTrainingSheet(); return; }
+      if(act==="openFire"){ openFireSheet(); return; }
       if(act==="toggleDelivery"){ state.delivery.enabled = !state.delivery.enabled; toast(state.delivery.enabled ? "已开通外卖" : "已暂停外卖"); setView("delivery"); return; }
       if(act==="adjustBudget"){
         openSheet("调整推广预算（Demo）",
@@ -947,6 +961,73 @@
         return;
       }
       if(act==="openLoc"){ setView("loc", {id: el.getAttribute('data-id')}); return; }
+      if(act==="shopCreate"){
+        const locId = el.getAttribute('data-id');
+        createShopAtLocation(locId);
+        closeSheet();
+        setView("shops");
+        return;
+      }
+      if(act==="shopClose"){
+        const id = el.getAttribute('data-id');
+        closeShopById(id);
+        closeSheet();
+        setView("shops");
+        return;
+      }
+      if(act==="shopRelocate"){
+        const id = el.getAttribute('data-shop');
+        const locId = el.getAttribute('data-loc');
+        relocateShop(id, locId);
+        closeSheet();
+        setView("shops");
+        return;
+      }
+      if(act==="hire"){
+        hireEmployee();
+        closeSheet();
+        setView("staff");
+        return;
+      }
+      if(act==="schedule"){
+        applySchedule();
+        closeSheet();
+        setView("staff");
+        return;
+      }
+      if(act==="training"){
+        applyTraining();
+        closeSheet();
+        setView("staff");
+        return;
+      }
+      if(act==="fire"){
+        const id = el.getAttribute('data-id');
+        fireEmployee(id);
+        closeSheet();
+        setView("staff");
+        return;
+      }
+      if(act==="empTalk"){
+        talkEmployee(el.getAttribute('data-id'));
+        setView("emp", {id: el.getAttribute('data-id')});
+        return;
+      }
+      if(act==="empSchedule"){
+        scheduleEmployee(el.getAttribute('data-id'));
+        setView("emp", {id: el.getAttribute('data-id')});
+        return;
+      }
+      if(act==="empTrain"){
+        trainEmployee(el.getAttribute('data-id'));
+        setView("emp", {id: el.getAttribute('data-id')});
+        return;
+      }
+      if(act==="empFire"){
+        fireEmployee(el.getAttribute('data-id'));
+        setView("staff");
+        return;
+      }
       if(act==="claim"){
         const id = el.getAttribute('data-id');
         const a = state.achievements.find(x=>x.id===id);
@@ -987,6 +1068,159 @@
 
     // Init
     render();
+
+    // ===== Demo Ops (Shops) =====
+    function openShopCreateSheet(){
+      const list = state.locations.map(l=>`
+        <div class="row">
+          <div><b>${l.name}</b><span>租金 ${fmtMoney(l.rent).replace("¥ ","¥ ")} / 月</span></div>
+          <button class="pill" data-act="shopCreate" data-id="${l.id}">在此开店</button>
+        </div>
+      `).join("");
+      openSheet("开新店（Demo）", list || `<div class="row"><span>暂无门面</span><b class="mono">—</b></div>`);
+    }
+
+    function openShopCloseSheet(){
+      const list = state.shops.map(sp=>`
+        <div class="row">
+          <div><b>${sp.name}</b><span>评分 ★ ${sp.rating.toFixed(1)}</span></div>
+          <button class="pill" data-act="shopClose" data-id="${sp.id}">关店</button>
+        </div>
+      `).join("");
+      openSheet("关店（Demo）", list || `<div class="row"><span>暂无店铺</span><b class="mono">—</b></div>`);
+    }
+
+    function openShopRelocateSheet(){
+      if(state.shops.length===0){
+        openSheet("搬店/选址（Demo）", `<div class="row"><span>暂无店铺</span><b class="mono">—</b></div>`);
+        return;
+      }
+      const shop = state.shops[0];
+      const list = state.locations.map(l=>`
+        <div class="row">
+          <div><b>${l.name}</b><span>租金 ${fmtMoney(l.rent).replace("¥ ","¥ ")} / 月</span></div>
+          <button class="pill" data-act="shopRelocate" data-shop="${shop.id}" data-loc="${l.id}">搬到这里</button>
+        </div>
+      `).join("");
+      openSheet(`搬店（Demo）：${shop.name}`, list);
+    }
+
+    function createShopAtLocation(locId){
+      const loc = state.locations.find(x=>x.id===locId);
+      const id = genId("shop");
+      const base = randInt(-2000, 12000);
+      state.shops.push({
+        id,
+        name:`新店 · ${loc?loc.name:"未知位置"}`,
+        rating: randInt(36,46)/10,
+        baseProfit: base,
+        dineIn: 0.5,
+        delivery: 0.5
+      });
+      toast("已开新店（Demo）");
+    }
+
+    function closeShopById(id){
+      const idx = state.shops.findIndex(x=>x.id===id);
+      if(idx>=0){
+        state.shops.splice(idx,1);
+        toast("已关店（Demo）");
+      }
+    }
+
+    function relocateShop(id, locId){
+      const sp = state.shops.find(x=>x.id===id);
+      const loc = state.locations.find(x=>x.id===locId);
+      if(sp && loc){
+        sp.name = sp.name.split(" · ")[0] + " · " + loc.name;
+        toast("已搬店（Demo）");
+      }
+    }
+
+    // ===== Demo Ops (Staff) =====
+    function openHireSheet(){
+      openSheet("招聘（Demo）",
+        `<div class="row"><span>候选：小李 · 店员</span><b class="mono">${fmtMoney(3600).replace("¥ ","¥ ")}/月</b></div>
+         <button class="btn secondary" data-act="hire">确认招聘</button>`
+      );
+    }
+
+    function openScheduleSheet(){
+      openSheet("排班（Demo）",
+        `<div class="row"><span>方案</span><b class="mono">加 1 人晚班</b></div>
+         <button class="btn secondary" data-act="schedule">应用排班</button>`
+      );
+    }
+
+    function openTrainingSheet(){
+      openSheet("培训（Demo）",
+        `<div class="row"><span>主题</span><b class="mono">服务礼仪</b></div>
+         <button class="btn secondary" data-act="training">开始培训</button>`
+      );
+    }
+
+    function openFireSheet(){
+      const list = state.employees.map(p=>`
+        <div class="row">
+          <div><b>${p.name} · ${p.role}</b><span>心情：${p.mood}</span></div>
+          <button class="pill" data-act="fire" data-id="${p.id}">开除</button>
+        </div>
+      `).join("");
+      openSheet("开除（Demo）", list || `<div class="row"><span>暂无员工</span><b class="mono">—</b></div>`);
+    }
+
+    function hireEmployee(){
+      const id = genId("emp");
+      state.employees.push({
+        id,
+        name:"临时工",
+        role:"店员",
+        mood:"一般",
+        wage: 3600,
+        risk:"—"
+      });
+      toast("已招聘 1 人（Demo）");
+    }
+
+    function applySchedule(){
+      state.employees.forEach(p=>{ if(p.mood==="紧绷") p.mood="一般"; });
+      toast("排班已调整（Demo）");
+    }
+
+    function applyTraining(){
+      state.employees.forEach(p=>{ if(p.mood==="一般") p.mood="不错"; });
+      toast("培训完成（Demo）");
+    }
+
+    function fireEmployee(id){
+      const idx = state.employees.findIndex(x=>x.id===id);
+      if(idx>=0){
+        state.employees.splice(idx,1);
+        toast("已开除（Demo）");
+      }
+    }
+
+    function talkEmployee(id){
+      const p = state.employees.find(x=>x.id===id);
+      if(!p) return;
+      p.mood = "一般";
+      p.risk = "—";
+      toast("已安抚（Demo）");
+    }
+
+    function scheduleEmployee(id){
+      const p = state.employees.find(x=>x.id===id);
+      if(!p) return;
+      p.mood = "不错";
+      toast("已调整排班（Demo）");
+    }
+
+    function trainEmployee(id){
+      const p = state.employees.find(x=>x.id===id);
+      if(!p) return;
+      p.mood = "不错";
+      toast("已培训（Demo）");
+    }
   </script>
 </body>
 </html>

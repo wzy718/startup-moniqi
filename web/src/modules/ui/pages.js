@@ -66,10 +66,14 @@ export function renderHome({ state, data }) {
   const worldCard = renderWorldMini({ state, data });
 
   const quickNav = [
-    { id: "shops", e: "🏪", n: "店铺", t: "评分/利润" },
+    { id: "shops", e: "🏪", n: "店铺", t: "评分/利润", red: true },
+    { id: "staff", e: "👥", n: "人事", t: "按店铺管理", red: true },
+    { id: "delivery", e: "🛵", n: "外卖", t: "按店铺设置", red: true },
+    { id: "location", e: "🗺️", n: "选址", t: "开店/搬迁", red: true },
     { id: "world", e: "🌍", n: "世界", t: "持续影响" },
     { id: "achievements", e: "🏆", n: "成就", t: "解锁奖励" },
-    { id: "settings", e: "⚙️", n: "设置", t: "存档/路径" },
+    { id: "rank", e: "📈", n: "排行榜", t: "财富榜", red: true },
+    { id: "welfare", e: "🎁", n: "福利", t: "每日奖励", red: true },
   ];
 
   return `
@@ -81,7 +85,7 @@ export function renderHome({ state, data }) {
           <span>称号：${escapeHtml(state.player.title)}</span>
         </div>
       </div>
-      <div class="pill" data-act="openTimeline"><b>第 ${state.currentWeek} 周</b><span style="color:var(--muted)">· ${season.icon} ${season.name}</span></div>
+      <div class="pill" data-act="openTimeline"><b>第 ${state.currentWeek} 月</b><span style="color:var(--muted)">· ${season.icon} ${season.name}</span></div>
       <div style="display:flex; gap:8px">
         <div class="icon" data-act="openHelp">❓</div>
         <div class="icon" data-act="manualSave">💾</div>
@@ -102,7 +106,7 @@ export function renderHome({ state, data }) {
 
         <div class="chips">
           <div class="chip" data-act="openNet">
-            <span style="opacity:.9">上周净现金流</span>
+            <span style="opacity:.9">上月净现金流</span>
             <b class="${netClass} mono">${fmtSignedMoney(lastNet)}</b>
           </div>
           <div class="chip" data-act="openStatus">
@@ -126,6 +130,7 @@ export function renderHome({ state, data }) {
           .map(
             (x) => `
             <div class="nav" data-act="nav" data-to="${escapeHtml(x.id)}">
+              ${x.red ? '<div class="dot"></div>' : ""}
               <div class="e">${x.e}</div>
               <div class="n">${escapeHtml(x.n)}</div>
               <div class="t">${escapeHtml(x.t)}</div>
@@ -147,7 +152,7 @@ export function renderHome({ state, data }) {
               <div class="row" data-act="openShop" data-id="${escapeHtml(sp.id)}">
                 <div style="min-width:0">
                   <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${escapeHtml(sp.name)}</b>
-                  <span>★ ${Number(sp.rating || 0).toFixed(1)} · 上周利润</span>
+                  <span>★ ${Number(sp.rating || 0).toFixed(1)} · 上月利润</span>
                 </div>
                 <div class="mono ${p >= 0 ? "good" : "bad"}" style="font-weight:950">${fmtSignedMoney(p)}</div>
               </div>
@@ -162,7 +167,7 @@ export function renderHome({ state, data }) {
 export function pageShell({ state, title, subtitle, body }) {
   const season = getSeasonLabel(getSeasonId(state.currentWeek));
   const back = `<div class="icon" data-act="back">←</div>`;
-  const right = `<div class="pill" data-act="openTimeline"><b>第 ${state.currentWeek} 周</b><span style="color:var(--muted)">· ${season.icon} ${season.name}</span></div>`;
+  const right = `<div class="pill" data-act="openTimeline"><b>第 ${state.currentWeek} 月</b><span style="color:var(--muted)">· ${season.icon} ${season.name}</span></div>`;
   return `
     <div class="top">
       <div class="left">
@@ -185,7 +190,7 @@ export function renderEvent({ state, data, event, choices }) {
   const season = getSeasonLabel(getSeasonId(state.currentWeek));
   const body = `
     <div class="card sec">
-      <div class="head"><h2>第 ${state.currentWeek} 周事件</h2><div class="hint">${season.icon} ${season.name}</div></div>
+      <div class="head"><h2>第 ${state.currentWeek} 月事件</h2><div class="hint">${season.icon} ${season.name}</div></div>
       <div class="pad" style="color:rgba(232,238,252,.92); font-size:13px; line-height:1.55">
         <b style="font-weight:950; font-size:16px">${escapeHtml(event.title)}</b>
         <div style="margin-top:8px; color:var(--muted)">${escapeHtml(event.description)}</div>
@@ -216,7 +221,7 @@ export function renderEvent({ state, data, event, choices }) {
       </div>
     </div>
   `;
-  return pageShell({ state, title: "本周事件", subtitle: "选择一项推进 1 周", body });
+  return pageShell({ state, title: "本月事件", subtitle: "选择一项推进 1 月", body });
 }
 
 export function renderShops({ state, data }) {
@@ -241,31 +246,63 @@ export function renderShops({ state, data }) {
           .join("")}
       </div>
     </div>
+
+    <div class="card sec">
+      <div class="head"><h2>管理操作（Demo）</h2><div class="hint">可用</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        <button class="btn secondary" data-act="openShopCreate" type="button">开新店</button>
+        <button class="btn secondary" data-act="openShopClose" type="button">关店</button>
+        <button class="btn secondary" data-act="openShopRelocate" type="button">搬店 / 选址</button>
+      </div>
+    </div>
   `;
   return pageShell({ state, title: "店铺", subtitle: "经营表现与基础信息", body });
 }
 
 export function renderAchievements({ state, data }) {
-  const unlocked = state.player.achievementsUnlocked || {};
+  const unlockedMap = state.player.achievementsUnlocked || {};
+  const visible = data.achievements.filter((a) => !a.hidden || unlockedMap[a.id]);
+  const unlocked = visible.filter((a) => Boolean(unlockedMap[a.id]));
+  const locked = visible.filter((a) => !unlockedMap[a.id]);
+
+  const renderItem = (a, ok) => {
+    const iconName = (a.icon ? a.icon + " " : "") + a.name;
+    const condText = `条件 ${String(a.condition_type || "")} ${String(a.condition_value || "")}`.trim();
+    const rewardText = a.reward_type ? `奖励 ${String(a.reward_type)} ${String(a.reward_value || "")}`.trim() : "奖励 —";
+    return `
+      <div class="row">
+        <div style="min-width:0">
+          <b>${escapeHtml(iconName)}</b>
+          <span>${escapeHtml(a.description || "")}</span>
+          <div class="badges" style="margin-top:8px">
+            <span class="badge">${escapeHtml(condText)}</span>
+            <span class="badge good">${escapeHtml(rewardText)}</span>
+          </div>
+        </div>
+        <span class="badge ${ok ? "good" : ""}">${ok ? "已解锁" : "未解锁"}</span>
+      </div>
+    `;
+  };
+
+  const unlockedList = unlocked.length
+    ? unlocked.map((a) => renderItem(a, true)).join("")
+    : `<div class="row"><span>暂无已解锁成就</span><b class="mono">—</b></div>`;
+
+  const lockedList = locked.length
+    ? locked.map((a) => renderItem(a, false)).join("")
+    : `<div class="row"><span>你已经解锁了所有可见成就</span><b class="mono">🎉</b></div>`;
+
   const body = `
     <div class="card sec">
-      <div class="head"><h2>成就</h2><div class="hint">达成即自动领取</div></div>
+      <div class="head"><h2>已解锁</h2><div class="hint">${unlocked.length}/${visible.length}</div></div>
       <div class="pad" style="display:flex; flex-direction:column; gap:10px">
-        ${data.achievements
-          .filter((a) => !a.hidden || unlocked[a.id])
-          .map((a) => {
-            const ok = Boolean(unlocked[a.id]);
-            return `
-              <div class="row">
-                <div style="min-width:0">
-                  <b>${escapeHtml((a.icon ? a.icon + " " : "") + a.name)}</b>
-                  <span>${escapeHtml(a.description)} · 条件：${escapeHtml(a.condition_type)} ${escapeHtml(a.condition_value)}</span>
-                </div>
-                <div class="mono" style="font-weight:950">${ok ? "已解锁" : "未解锁"}</div>
-              </div>
-            `;
-          })
-          .join("")}
+        ${unlockedList}
+      </div>
+    </div>
+    <div class="card sec">
+      <div class="head"><h2>未解锁</h2><div class="hint">${locked.length} 个</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        ${lockedList}
       </div>
     </div>
   `;
@@ -284,7 +321,7 @@ export function renderWorld({ state, data }) {
             ? active
                 .map((a) => {
                   const def = defsById.get(a.id);
-                  const left = a.remainingWeeks === -1 ? "永久" : `剩余 ${a.remainingWeeks} 周`;
+                  const left = a.remainingWeeks === -1 ? "永久" : `剩余 ${a.remainingWeeks} 月`;
                   return `
                     <div class="row">
                       <div style="min-width:0">
@@ -296,7 +333,7 @@ export function renderWorld({ state, data }) {
                   `;
                 })
                 .join("")
-            : `<div class="row"><span>本周暂无持续世界事件</span><b class="mono">—</b></div>`
+            : `<div class="row"><span>本月暂无持续世界事件</span><b class="mono">—</b></div>`
         }
       </div>
     </div>
@@ -307,7 +344,7 @@ export function renderWorld({ state, data }) {
         ${data.worldEvents
           .map((x) => {
             const dur =
-              x.duration_min === -1 && x.duration_max === -1 ? "永久" : `${x.duration_min}~${x.duration_max} 周`;
+              x.duration_min === -1 && x.duration_max === -1 ? "永久" : `${x.duration_min}~${x.duration_max} 月`;
             return `
               <div class="row">
                 <div style="min-width:0">
@@ -322,7 +359,238 @@ export function renderWorld({ state, data }) {
       </div>
     </div>
   `;
-  return pageShell({ state, title: "世界事件", subtitle: "跨多周影响系统", body });
+  return pageShell({ state, title: "世界事件", subtitle: "跨多月影响系统", body });
+}
+
+export function renderStaff({ state, data }) {
+  const shops = state.shops || [];
+  const employees = state.employees || [];
+
+  const rows = shops
+    .map((sp) => {
+      const typeName = data.shopTypes.get(sp.typeId)?.name || sp.typeId;
+      const locName = data.locations.get(sp.locationId)?.name || sp.locationId;
+      const list = employees.filter((e) => e.shopId === sp.id);
+      const payroll = list.reduce((a, e) => a + Math.round(Number(e.wage || 0)), 0);
+      const riskHigh = list.filter((e) => String(e.risk || "").includes("高")).length;
+      const riskMid = list.filter((e) => String(e.risk || "").includes("中")).length;
+      const riskLow = Math.max(0, list.length - riskHigh - riskMid);
+      const riskCls = riskHigh ? "bad" : riskMid ? "warn" : "good";
+      const riskText = riskHigh ? `高 ${riskHigh}` : riskMid ? `中 ${riskMid}` : `低 ${riskLow}`;
+
+      return `
+        <div class="row link" data-act="openStaffShop" data-id="${escapeHtml(sp.id)}">
+          <div style="min-width:0">
+            <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${escapeHtml(sp.name)}</b>
+            <span>${escapeHtml(typeName)} · ${escapeHtml(locName)}</span>
+            <div class="badges" style="margin-top:8px">
+              <span class="badge">员工 ${list.length}</span>
+              <span class="badge">月工资 ${fmtMoney(payroll).replace("¥ ", "¥ ")}</span>
+              <span class="badge ${riskCls}">风险 ${escapeHtml(riskText)}</span>
+            </div>
+          </div>
+          <div class="mono" style="font-weight:950">→</div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const unassigned = employees.filter((e) => !e.shopId || !shops.find((s) => s.id === e.shopId));
+  const unassignedCard = `
+    <div class="card sec">
+      <div class="head"><h2>待分配员工</h2><div class="hint">${unassigned.length} 人</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        ${
+          unassigned.length
+            ? unassigned
+                .map(
+                  (p) => `
+                  <div class="row link" data-act="openEmp" data-id="${escapeHtml(p.id)}">
+                    <div class="empLeft">
+                      <div class="miniAvatar">${escapeHtml(String(p.name || "?").slice(0, 1))}</div>
+                      <div class="meta">
+                        <b>${escapeHtml(p.name)} · ${escapeHtml(p.role)}</b>
+                        <div class="badges" style="margin-top:6px">
+                          <span class="badge">${escapeHtml(`心情 ${p.mood}`)}</span>
+                          <span class="badge">${escapeHtml(`风险 ${p.risk}`)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center">
+                      <div class="mono" style="font-weight:950">${fmtMoney(p.wage).replace("¥ ", "¥ ")}/月</div>
+                      <button class="btn small secondary" data-act="openAssignEmp" data-id="${escapeHtml(p.id)}" type="button">分配</button>
+                    </div>
+                  </div>
+                `,
+                )
+                .join("")
+            : `<div class="row"><span>暂无</span><b class="mono">—</b></div>`
+        }
+      </div>
+    </div>
+  `;
+
+  const body = `
+    <div class="card sec">
+      <div class="head"><h2>店铺人事</h2><div class="hint">点开店铺进行招聘/排班/培训/开除</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        ${rows || `<div class="row"><span>暂无店铺</span><b class="mono">—</b></div>`}
+      </div>
+    </div>
+    ${unassignedCard}
+  `;
+  return pageShell({ state, title: "人事", subtitle: "按店铺管理员工", body });
+}
+
+export function renderEmpDetail({ state, data, emp }) {
+  if (!emp) {
+    return pageShell({
+      state,
+      title: "员工",
+      subtitle: "未找到",
+      body: `<div class="card sec"><div class="pad">未找到该员工。</div></div>`,
+    });
+  }
+
+  const shop = (state.shops || []).find((s) => s.id === emp.shopId);
+  const shopName = shop ? shop.name : "未分配";
+  const locName = shop ? data.locations.get(shop.locationId)?.name || shop.locationId : "—";
+
+  const body = `
+    <div class="card sec">
+      <div class="head"><h2>${escapeHtml(emp.name)}</h2><div class="hint">${escapeHtml(emp.role)}</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        <div class="chips" style="margin-top:0">
+          <div class="chip" style="cursor:default"><span>所属店铺</span><b>${escapeHtml(shopName)}</b></div>
+          <div class="chip" style="cursor:default"><span>位置</span><b>${escapeHtml(locName)}</b></div>
+        </div>
+
+        <div class="row">
+          <div style="min-width:0">
+            <b>状态概览</b>
+            <div class="badges" style="margin-top:6px">
+              <span class="badge">心情 ${escapeHtml(emp.mood)}</span>
+              <span class="badge ${String(emp.risk || "").includes("高") ? "bad" : String(emp.risk || "").includes("中") ? "warn" : "good"}">风险 ${escapeHtml(emp.risk)}</span>
+            </div>
+          </div>
+          <div class="mono" style="font-weight:950">${fmtMoney(emp.wage).replace("¥ ", "¥ ")}/月</div>
+        </div>
+
+        <div class="btnline">
+          <button class="btn small secondary" data-act="empTalk" data-id="${escapeHtml(emp.id)}" type="button">谈话/安抚</button>
+          <button class="btn small secondary" data-act="empSchedule" data-id="${escapeHtml(emp.id)}" type="button">调整排班</button>
+          <button class="btn small secondary" data-act="empTrain" data-id="${escapeHtml(emp.id)}" type="button">培训提升</button>
+          <button class="btn small secondary" data-act="openTransferEmp" data-id="${escapeHtml(emp.id)}" type="button">调到其他店</button>
+          <button class="btn small danger" data-act="empFire" data-id="${escapeHtml(emp.id)}" type="button">开除</button>
+        </div>
+      </div>
+    </div>
+  `;
+  return pageShell({ state, title: "员工详情", subtitle: "与店铺绑定的管理操作", body });
+}
+
+export function renderDelivery({ state, data }) {
+  const shops = state.shops || [];
+  const body = `
+    <div class="card sec">
+      <div class="head"><h2>按店铺配置外卖</h2><div class="hint">${shops.length} 家</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        ${
+          shops.length
+            ? shops
+                .map((sp) => {
+                  const typeName = data.shopTypes.get(sp.typeId)?.name || sp.typeId;
+                  const locName = data.locations.get(sp.locationId)?.name || sp.locationId;
+                  const d = sp.delivery || { enabled: false, budget: 0, feeRate: 0.2, orders: 0 };
+                  return `
+                    <div class="row" data-act="openShopDelivery" data-id="${escapeHtml(sp.id)}">
+                      <div style="min-width:0">
+                        <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${escapeHtml(sp.name)}</b>
+                        <span>${escapeHtml(typeName)} · ${escapeHtml(locName)} · ${d.enabled ? "已开通" : "未开通"} · 预算 ${fmtMoney(d.budget).replace("¥ ", "¥ ")}</span>
+                      </div>
+                      <div class="mono" style="font-weight:950">→</div>
+                    </div>
+                  `;
+                })
+                .join("")
+            : `<div class="row"><span>暂无店铺</span><b class="mono">—</b></div>`
+        }
+      </div>
+    </div>
+  `;
+  return pageShell({ state, title: "外卖", subtitle: "与店铺绑定的渠道设置", body });
+}
+
+export function renderLocation({ state, data }) {
+  const list = Array.from(data.locations.values());
+  const rows = list
+    .map((l) => {
+      return `
+        <div class="row link" data-act="openLoc" data-id="${escapeHtml(l.id)}">
+          <div style="min-width:0">
+            <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${escapeHtml(l.name)}</b>
+            <span>人流 ${escapeHtml(l.traffic_multiplier)}x · 竞争 ${escapeHtml(l.competition_base)} · 租金系数 ${l.rent_multiplier.toFixed(1)}</span>
+          </div>
+          <div class="mono" style="font-weight:950">→</div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const body = `
+    <div class="card sec">
+      <div class="head"><h2>可选门面</h2><div class="hint">点开门面进行开店/搬迁</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        ${rows}
+      </div>
+    </div>
+    <div class="card sec">
+      <div class="head"><h2>提示</h2><div class="hint">占位</div></div>
+      <div class="pad">
+        <div style="color:var(--muted); font-size:12px; line-height:1.5">
+          真实版本建议展示：押金、预计客流、同类竞争、目标客群匹配度等，并在“开店/搬店”时做资金校验与事件触发。
+        </div>
+      </div>
+    </div>
+  `;
+  return pageShell({ state, title: "选址/门面", subtitle: "评估成本与机会", body });
+}
+
+export function renderRank({ state }) {
+  const body = `
+    <div class="card sec">
+      <div class="head"><h2>排行榜</h2><div class="hint">财富榜（Demo）</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        ${(state.leaderboard || [])
+          .map(
+            (x) => `
+            <div class="row">
+              <div><b>#${x.rank} ${escapeHtml(x.name)}</b><span>现金</span></div>
+              <div class="mono" style="font-weight:950">${fmtMoney(x.cash)}</div>
+            </div>
+          `,
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+  return pageShell({ state, title: "排行榜", subtitle: "看看你的位置", body });
+}
+
+export function renderWelfare({ state }) {
+  const w = state.welfare;
+  const body = `
+    <div class="card sec">
+      <div class="head"><h2>福利</h2><div class="hint">每日奖励（Demo）</div></div>
+      <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+        <div class="row"><div><b>每日登录奖励</b><span>现金 +¥1,000</span></div><div class="mono">${w.dailyClaimed ? "已领取" : "未领取"}</div></div>
+        <button class="btn ${w.dailyClaimed ? "secondary" : ""}" data-act="claimDaily" ${w.dailyClaimed ? "disabled" : ""} type="button">${w.dailyClaimed ? "今日已领取" : "领取今日奖励"}</button>
+        <div class="row"><div><b>跳过券</b><span>用于跳过动画/事件（占位）</span></div><div class="mono">${w.skipTickets} 张</div></div>
+        <button class="btn secondary" data-act="toast" data-msg="观看广告获得奖励（Demo）" type="button">看广告领奖励</button>
+      </div>
+    </div>
+  `;
+  return pageShell({ state, title: "福利", subtitle: "轻量变现入口占位", body });
 }
 
 export function renderSettings({ state, dataBaseUrl }) {
@@ -330,7 +598,7 @@ export function renderSettings({ state, dataBaseUrl }) {
     <div class="card sec">
       <div class="head"><h2>存档</h2><div class="hint">本地 localStorage</div></div>
       <div class="pad" style="display:flex; flex-direction:column; gap:10px">
-        <div class="row"><div><b>当前周</b><span>用于校验存档是否正常</span></div><div class="mono">${state.currentWeek}</div></div>
+        <div class="row"><div><b>当前月</b><span>用于校验存档是否正常</span></div><div class="mono">${state.currentWeek}</div></div>
         <button class="btn secondary" data-act="resetGame" type="button">重新开局（清空存档）</button>
       </div>
     </div>
@@ -352,7 +620,7 @@ export function renderGameOver({ state }) {
       <div class="head"><h2>游戏结束</h2><div class="hint">本局到此为止</div></div>
       <div class="pad" style="display:flex; flex-direction:column; gap:10px">
         <div class="row"><div><b>原因</b><span>${escapeHtml(state.gameOverReason || "—")}</span></div><div class="mono bad">GAME OVER</div></div>
-        <div class="row"><div><b>坚持</b><span>存活周数</span></div><div class="mono">${state.player.stats.weeksSurvived}</div></div>
+        <div class="row"><div><b>坚持</b><span>存活月数</span></div><div class="mono">${state.player.stats.weeksSurvived}</div></div>
         <button class="btn" data-act="resetGame" type="button">重新开始</button>
         <button class="btn secondary" data-act="home" type="button">回到主界面</button>
       </div>
@@ -367,7 +635,7 @@ export function renderTimelineRows({ state }) {
   return items
     .map((it) => {
       const t = fmtSignedMoney(it.net);
-      return `<div class="row"><div><b>第 ${it.week} 周</b><span>${escapeHtml(it.title)}</span></div><div class="mono ${it.net >= 0 ? "good" : "bad"}" style="font-weight:950">${t}</div></div>`;
+      return `<div class="row"><div><b>第 ${it.week} 月</b><span>${escapeHtml(it.title)}</span></div><div class="mono ${it.net >= 0 ? "good" : "bad"}" style="font-weight:950">${t}</div></div>`;
     })
     .join("");
 }
@@ -384,13 +652,13 @@ export function renderPlayerSheet({ state }) {
 
 export function renderNetSheet({ state }) {
   const last = state.lastTurn;
-  if (!last) return `<div class="row"><span>暂无上周结算</span><b class="mono">—</b></div>`;
+  if (!last) return `<div class="row"><span>暂无上月结算</span><b class="mono">—</b></div>`;
   return `
     <div class="row"><span>店铺利润汇总</span><b class="mono">${fmtMoney(last.shopProfitTotal)}</b></div>
     <div class="row"><span>生活费</span><b class="mono bad">- ${fmtMoney(last.livingExpense).replace("¥ ", "¥ ")}</b></div>
     <div class="row"><span>贷款还款</span><b class="mono bad">- ${fmtMoney(last.loanPaymentTotal).replace("¥ ", "¥ ")}</b></div>
     <div class="row"><span>事件现金</span><b class="mono">${fmtSignedMoney(last.applied.cashDelta)}</b></div>
-    <div class="row"><span><b>合计（上周净现金流）</b></span><b class="mono ${last.weeklyNetCashflow >= 0 ? "good" : "bad"}">${fmtSignedMoney(last.weeklyNetCashflow)}</b></div>
+    <div class="row"><span><b>合计（上月净现金流）</b></span><b class="mono ${last.weeklyNetCashflow >= 0 ? "good" : "bad"}">${fmtSignedMoney(last.weeklyNetCashflow)}</b></div>
   `;
 }
 
@@ -423,7 +691,7 @@ function renderWorldMini({ state, data }) {
           .slice(0, 2)
           .map((a) => {
             const def = defsById.get(a.id);
-            const left = a.remainingWeeks === -1 ? "永久" : `剩余 ${a.remainingWeeks} 周`;
+            const left = a.remainingWeeks === -1 ? "永久" : `剩余 ${a.remainingWeeks} 月`;
             return `
               <div class="row">
                 <div style="min-width:0">

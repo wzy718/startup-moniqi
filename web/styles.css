@@ -66,8 +66,41 @@ body{
 .pad{padding:0 14px 14px}
 .mono{font-family:var(--mono)}
 .row{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:10px 10px; border-radius:var(--r2); border:1px solid var(--line); background:rgba(11,15,25,.25)}
+.row.link{cursor:pointer; user-select:none}
+.row.link:hover{background:rgba(11,15,25,.32)}
 .row b{font-size:13px; font-weight:950}
 .row span{font-size:12px; color:var(--muted)}
+
+.empLeft{display:flex; align-items:center; gap:10px; min-width:0}
+.miniAvatar{
+  width:32px; height:32px;
+  border-radius:12px;
+  display:grid; place-items:center;
+  font-weight:950;
+  color:rgba(232,238,252,.95);
+  background:linear-gradient(135deg, rgba(124,92,255,.55), rgba(53,208,127,.45));
+  border:1px solid rgba(255,255,255,.14);
+  flex:0 0 auto;
+}
+.meta{min-width:0}
+.meta b{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.meta span{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+.badges{display:flex; gap:6px; flex-wrap:wrap}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(11,15,25,.20);
+  font-size:11px;
+  color:rgba(232,238,252,.88);
+}
+.badge.good{border-color:rgba(53,208,127,.35); background:rgba(53,208,127,.10); color:var(--good)}
+.badge.bad{border-color:rgba(255,95,106,.35); background:rgba(255,95,106,.10); color:var(--bad)}
+.badge.warn{border-color:rgba(255,176,32,.35); background:rgba(255,176,32,.10); color:var(--warn)}
 .btn{
   width:100%;
   border:none;
@@ -87,6 +120,21 @@ body{
   color:var(--text);
   box-shadow:none;
 }
+.btn.danger{
+  background:rgba(255,95,106,.14);
+  border:1px solid rgba(255,95,106,.28);
+  color:var(--text);
+  box-shadow:none;
+}
+.btn.small{
+  width:auto;
+  padding:10px 12px;
+  font-size:13px;
+  border-radius:14px;
+  box-shadow:none;
+}
+.btnline{display:flex; gap:10px; flex-wrap:wrap}
+.btnline .btn.small{flex:1; min-width:128px}
 .btn:disabled{opacity:.55; cursor:not-allowed}
 
 /* 极简核心面板 */
@@ -188,4 +236,3 @@ select,input{
   outline:none;
 }
 input::placeholder{color:rgba(155,176,217,.65)}
-

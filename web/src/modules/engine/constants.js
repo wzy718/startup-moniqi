@@ -2,9 +2,9 @@
 
 export const GAME_STATE_VERSION = 1;
 
-// 时间口径：1 回合 = 1 周
-export const WEEKS_PER_MONTH = 4;
-export const WEEKS_PER_YEAR = 48;
+// 时间口径：1 回合 = 1 月
+export const MONTHS_PER_YEAR = 12;
+export const DAYS_PER_MONTH = 30;
 
 // 初始值
 export const INITIAL_CASH = 100000;
@@ -16,5 +16,4 @@ export const INITIAL_AGE = 25;
 export const INITIAL_LIVING_EXPENSE = 2000;
 
 // 判定阈值
-export const STRESS_DEATH_WEEKS = 4;
-
+export const STRESS_DEATH_MONTHS = 4;
