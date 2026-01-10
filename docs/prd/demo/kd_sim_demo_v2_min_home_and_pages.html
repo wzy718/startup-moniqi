@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>开店模拟器 Demo v2｜极简主面板 + 全入口页面</title>
+  <style>
+    :root{
+      --bg:#0b0f19;
+      --card:#121a2b;
+      --text:#e8eefc;
+      --muted:#9bb0d9;
+      --line:rgba(255,255,255,.10);
+      --good:#35d07f;
+      --bad:#ff5f6a;
+      --warn:#ffb020;
+      --accent:#7c5cff;
+      --shadow:0 12px 40px rgba(0,0,0,.45);
+      --r:18px;
+      --r2:14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(124,92,255,.25), transparent 55%),
+        radial-gradient(1000px 700px at 80% 30%, rgba(53,208,127,.18), transparent 55%),
+        radial-gradient(900px 700px at 40% 90%, rgba(255,176,32,.14), transparent 55%),
+        var(--bg);
+    }
+    .app{max-width:460px; margin:0 auto; padding:16px 14px 92px;}
+    .top{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 2px 12px;}
+    .left{display:flex; align-items:center; gap:10px; min-width:0;}
+    .avatar{width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, rgba(124,92,255,.9), rgba(53,208,127,.8)); box-shadow:0 10px 30px rgba(124,92,255,.22);}
+    .title{min-width:0}
+    .title b{display:block; font-size:14px; font-weight:950; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .title span{display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      padding:8px 10px; border:1px solid var(--line);
+      border-radius:999px; background:rgba(18,26,43,.55);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+      cursor:pointer; user-select:none;
+      font-size:12px;
+    }
+    .icon{
+      width:34px; height:34px; border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(18,26,43,.55);
+      color:var(--text);
+      display:grid; place-items:center;
+      cursor:pointer; user-select:none;
+    }
+    .icon:active{transform:scale(.98)}
+    .card{
+      background:linear-gradient(180deg, rgba(18,26,43,.85), rgba(15,23,40,.75));
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sec{margin:12px 0}
+    .head{padding:14px 14px 10px; display:flex; align-items:flex-end; justify-content:space-between; gap:10px;}
+    .head h2{margin:0; font-size:14px}
+    .head .hint{font-size:12px; color:var(--muted)}
+    .pad{padding:0 14px 14px}
+    .mono{font-family:var(--mono)}
+    .row{display:flex; justify-content:space-between; gap:10px; align-items:center; padding:10px 10px; border-radius:var(--r2); border:1px solid var(--line); background:rgba(11,15,25,.25)}
+    .row b{font-size:13px; font-weight:950}
+    .row span{font-size:12px; color:var(--muted)}
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:14px 14px;
+      background:linear-gradient(135deg, rgba(124,92,255,.95), rgba(53,208,127,.85));
+      color:#0b0f19;
+      font-weight:950;
+      font-size:16px;
+      cursor:pointer;
+      box-shadow:0 18px 40px rgba(124,92,255,.25);
+      user-select:none;
+    }
+    .btn.secondary{
+      background:rgba(18,26,43,.65);
+      border:1px solid var(--line);
+      color:var(--text);
+      box-shadow:none;
+    }
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    /* 极简核心面板 */
+    .hero{padding:14px}
+    .cash{font-size:22px; font-weight:1000; letter-spacing:.3px}
+    .subline{margin-top:6px; font-size:12px; color:var(--muted)}
+    .chips{margin-top:12px; display:flex; gap:8px; flex-wrap:wrap}
+    .chip{
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(11,15,25,.20);
+      padding:8px 10px;
+      display:flex; gap:8px; align-items:center;
+      font-size:12px;
+      cursor:pointer; user-select:none;
+    }
+    .chip b{font-weight:950}
+    .good{color:var(--good)}
+    .bad{color:var(--bad)}
+    .warn{color:var(--warn)}
+
+    /* 快捷入口 */
+    .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:14px;}
+    .nav{
+      position:relative;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(11,15,25,.22);
+      padding:10px 8px;
+      cursor:pointer;
+      user-select:none;
+      min-height:72px;
+    }
+    .nav:hover{background:rgba(11,15,25,.32)}
+    .nav .e{font-size:20px}
+    .nav .n{margin-top:6px; font-size:12px; font-weight:950}
+    .nav .t{margin-top:3px; font-size:11px; color:var(--muted)}
+    .dot{position:absolute; top:8px; right:8px; width:9px; height:9px; border-radius:999px; background:var(--bad); box-shadow:0 0 0 4px rgba(255,95,106,.18)}
+
+    /* 事件页 */
+    .choice{cursor:pointer; user-select:none}
+    .choice:hover{background:rgba(11,15,25,.32)}
+    .fx{margin-top:6px; display:flex; gap:6px; flex-wrap:wrap}
+    .fx i{font-style:normal; font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(15,23,40,.55)}
+    .fx .g{border-color:rgba(53,208,127,.35); background:rgba(53,208,127,.10)}
+    .fx .b{border-color:rgba(255,95,106,.35); background:rgba(255,95,106,.10)}
+    .fx .w{border-color:rgba(255,176,32,.35); background:rgba(255,176,32,.10)}
+
+    /* 底部固定栏（仅 Home） */
+    .footer{
+      position:fixed; left:0; right:0; bottom:0;
+      padding:10px 14px 14px;
+      background:linear-gradient(180deg, transparent, rgba(11,15,25,.78) 18%, rgba(11,15,25,.96));
+      display:flex; justify-content:center;
+      z-index:30;
+    }
+    .footer .wrap{width:min(460px, 100%); display:flex; gap:10px;}
+    .pillbtn{
+      flex:1;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(18,26,43,.55);
+      color:var(--text);
+      padding:12px 12px;
+      font-weight:950;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      user-select:none;
+    }
+    .pillbtn.primary{background:linear-gradient(135deg, rgba(124,92,255,.95), rgba(53,208,127,.85)); color:#0b0f19; border:none}
+
+    /* 抽屉 */
+    .mask{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:flex-end; justify-content:center; padding:16px; z-index:50;}
+    .sheet{width:min(460px, 100%); border-radius:22px; border:1px solid var(--line); background:linear-gradient(180deg, rgba(18,26,43,.98), rgba(15,23,40,.96)); box-shadow:0 20px 70px rgba(0,0,0,.6); overflow:hidden;}
+    .sheet .sh{display:flex; align-items:center; justify-content:space-between; padding:14px 14px; border-bottom:1px solid var(--line)}
+    .sheet .sh b{font-size:14px}
+    .sheet .body{padding:12px 14px 14px; display:flex; flex-direction:column; gap:10px}
+    .close{width:36px;height:36px;border-radius:14px;border:1px solid var(--line); background:rgba(11,15,25,.35); color:var(--text); cursor:pointer}
+
+    /* Toast */
+    .toast{
+      position:fixed; left:50%; bottom:92px; transform:translateX(-50%);
+      background:rgba(18,26,43,.92); border:1px solid rgba(255,255,255,.12);
+      padding:10px 12px; border-radius:14px; box-shadow:0 16px 50px rgba(0,0,0,.55);
+      font-size:12px; color:rgba(232,238,252,.95);
+      z-index:9999; opacity:0; transition:opacity .18s ease; pointer-events:none;
+    }
+    .toast.on{opacity:1}
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+  <div class="app" id="app"></div>
+
+  <div class="footer" id="footer">
+    <div class="wrap">
+      <div class="pillbtn" id="btnTimeline">🗓️ 时间线</div>
+      <div class="pillbtn primary" id="btnStart">▶ 开始本周</div>
+    </div>
+  </div>
+
+  <!-- Sheets -->
+  <div class="mask" id="sheetMask" aria-hidden="true">
+    <div class="sheet">
+      <div class="sh">
+        <b id="sheetTitle">Sheet</b>
+        <button class="close" id="sheetClose">✕</button>
+      </div>
+      <div class="body" id="sheetBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Utils =====
+    const $ = (sel)=>document.querySelector(sel);
+    const app = $("#app");
+    const toastEl = $("#toast");
+    const fmtMoney = (n)=> {
+      const sign = n < 0 ? "-" : "";
+      const x = Math.abs(Math.round(n));
+      return sign + "¥ " + x.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+    };
+    const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+    const seasonOfWeek = (week)=> {
+      const w = ((week-1)%52)+1;
+      if (w<=13) return {name:"春", icon:"🌱"};
+      if (w<=26) return {name:"夏", icon:"☀️"};
+      if (w<=39) return {name:"秋", icon:"🍂"};
+      return {name:"冬", icon:"❄️"};
+    };
+    const toast = (msg)=>{
+      toastEl.textContent=msg;
+      toastEl.classList.add('on');
+      clearTimeout(toast._t);
+      toast._t=setTimeout(()=>toastEl.classList.remove('on'), 1200);
+    };
+
+    // ===== State (demo) =====
+    const state = {
+      playerName:"阿店老板",
+      title:"稳健经营者",
+      week: 37,
+      year: 1,
+      cash: 128400,
+      assets: 312000,
+      stress: 92,
+      health: 71,
+      age: 26,
+      rep: 58,
+      stressMaxWeeks: 2,
+      livingCost: 2000,
+      loanPay: 2680,
+      world: {
+        active:true,
+        title:"疫情爆发",
+        remaining:6,
+        meta:"堂食受限 · 外卖爆发 · 防疫固定成本上升",
+        tags:[{t:"堂食 -40%",k:"bad"},{t:"外卖 +30%",k:"good"}],
+        dineInMul:0.6, deliveryMul:1.3,
+      },
+      shops: [
+        {id:"s1", name:"阿店奶茶 · 写字楼店", rating:4.3, baseProfit:8200, dineIn:0.40, delivery:0.60},
+        {id:"s2", name:"阿店小吃 · 社区店", rating:4.0, baseProfit:-1300, dineIn:0.70, delivery:0.30},
+        {id:"s3", name:"阿店咖啡 · 商场店", rating:4.6, baseProfit:2900, dineIn:0.55, delivery:0.45},
+      ],
+      employees: [
+        {id:"p1", name:"小周", role:"店长", mood:"紧绷", wage:5200, risk:"想请假"},
+        {id:"p2", name:"阿花", role:"收银", mood:"一般", wage:3800, risk:"—"},
+        {id:"p3", name:"大勇", role:"后厨", mood:"不错", wage:4200, risk:"—"},
+      ],
+      delivery: { enabled:true, budget: 300, feeRate: 0.18, orders: 420 },
+      locations: [
+        {id:"l1", name:"地铁口 12㎡", rent: 6800, foot: "高", competition:"中"},
+        {id:"l2", name:"社区门口 18㎡", rent: 5200, foot: "中", competition:"低"},
+        {id:"l3", name:"商场二层 22㎡", rent: 9200, foot: "高", competition:"高"},
+      ],
+      achievements: [
+        {id:"a1", name:"第一桶金", desc:"现金达到 ¥100,000", prog: 1.0, claim:true},
+        {id:"a2", name:"连锁起步", desc:"拥有 3 家店铺", prog: 1.0, claim:false},
+        {id:"a3", name:"口碑达人", desc:"任一店评分 ≥ 4.8", prog: 0.65, claim:false},
+      ],
+      leaderboard: [
+        {rank:1, name:"隔壁王总", cash: 980000},
+        {rank:2, name:"奶茶教父", cash: 760000},
+        {rank:3, name:"加班战神", cash: 540000},
+        {rank:18, name:"阿店老板（你）", cash: 128400},
+      ],
+      welfare: { dailyClaimed:false, skipTickets:2 },
+      timeline: []
+    };
+
+    for(let i=0;i<7;i++){
+      state.timeline.unshift({
+        week: state.week - (7-i),
+        title: ["开业第一天","招到关键店长","一场暴雨","平台抽成上调","门面续约成功","同店竞争出现","上周：延长营业时间"][i],
+        net: [3200, 2100, 1800, 1200, 900, 5400, 6820][i]
+      });
+    }
+
+    const eventsPool = [
+      { id:"e_overtime", title:"延长营业时间",
+        body:"客流不错，但员工已经很累了。你要不要把营业时间再拉长 1 小时？",
+        choices:[
+          { id:"A", title:"延长 1 小时，冲一波", desc:"利润更高，但压力上升。",
+            effects:{ cashEvent: 1200, stress:+6, health:-1, rep:+0 } },
+          { id:"B", title:"维持现状，稳住", desc:"少赚一点，但压力更稳。",
+            effects:{ cashEvent: 0, stress:-2, health:+0, rep:+1 } },
+          { id:"C", title:"缩短 1 小时，给团队喘口气", desc:"利润下降，但压力大幅缓解。",
+            effects:{ cashEvent: -800, stress:-8, health:+2, rep:+2 } }
+        ]
+      },
+      { id:"e_supplier", title:"原料涨价通知",
+        body:"供应商通知：本周起原料上涨 12%。你要怎么应对？",
+        choices:[
+          { id:"A", title:"立刻涨价 1 元", desc:"毛利稳，但可能掉口碑。",
+            effects:{ cashEvent: 600, stress:+2, health:+0, rep:-2 } },
+          { id:"B", title:"谈判 + 换供应链", desc:"有机会压成本，但费精力。",
+            effects:{ cashEvent: 900, stress:+4, health:-1, rep:+1 } },
+          { id:"C", title:"先不涨价，做促销引流", desc:"现金承压，但声望上涨。",
+            effects:{ cashEvent: -500, stress:+1, health:+0, rep:+3 } }
+        ]
+      }
+    ];
+
+    // ===== Router =====
+    const router = { view:"home", params:{} };
+    const setView = (view, params={})=>{
+      router.view=view; router.params=params;
+      render();
+      window.scrollTo({top:0, behavior:"instant"});
+    };
+
+    // ===== Sheets =====
+    const sheetMask = $("#sheetMask");
+    const sheetTitle = $("#sheetTitle");
+    const sheetBody = $("#sheetBody");
+    const openSheet = (title, bodyHtml)=>{
+      sheetTitle.textContent = title;
+      sheetBody.innerHTML = bodyHtml;
+      sheetMask.style.display='flex';
+      sheetMask.setAttribute('aria-hidden','false');
+    };
+    const closeSheet = ()=>{
+      sheetMask.style.display='none';
+      sheetMask.setAttribute('aria-hidden','true');
+    };
+    $("#sheetClose").addEventListener('click', closeSheet);
+    sheetMask.addEventListener('click', (e)=>{ if(e.target===sheetMask) closeSheet(); });
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSheet(); });
+
+    // ===== Home: 极简核心面板（只显示：现金 / 本周净现金流 / 压力 / 健康）=====
+    function renderHome(){
+      const s = state;
+      const season = seasonOfWeek(s.week);
+
+      const net = s._lastNet ?? 6820;
+      const netClass = net>=0 ? "good" : "bad";
+
+      const alert = (s.cash<=0) ? {t:"现金告急", d:"建议触发 Game Over / 复活入口（Demo 未实现）"} :
+                   (s.stress>=90) ? {t:`压力危险（${s.stressMaxWeeks}/4）`, d:"本周尽量选减压/稳现金流"} :
+                   (s.health<=35) ? {t:"健康偏低", d:"建议休息/降低强度"} : null;
+
+      const world = (s.world && s.world.active) ? `
+        <div class="card sec" data-act="openWorld">
+          <div class="head">
+            <h2>世界事件</h2>
+            <div class="hint">持续中</div>
+          </div>
+          <div class="pad" style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start">
+            <div>
+              <b style="font-weight:950;font-size:13px">🌍 ${s.world.title}（剩余 ${s.world.remaining} 周）</b>
+              <div class="subline" style="margin-top:6px">${s.world.meta}</div>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end">
+              ${s.world.tags.map(x=>`<span class="chip" style="cursor:default"><b class="${x.k==='good'?'good':x.k==='bad'?'bad':''}">${x.t}</b></span>`).join("")}
+            </div>
+          </div>
+        </div>
+      ` : "";
+
+      const quickNav = [
+        {id:"shops", e:"🏪", n:"店铺", t:"评分/利润", red:true},
+        {id:"staff", e:"👥", n:"员工", t:"离职风险", red:true},
+        {id:"delivery", e:"🛵", n:"外卖", t:"预算/抽成"},
+        {id:"location", e:"🗺️", n:"选址", t:"门面刷新"},
+        {id:"world", e:"🌍", n:"世界事件", t:(s.world?.active?"持续中":"无")},
+        {id:"ach", e:"🏆", n:"成就", t:"可领取", red:true},
+        {id:"rank", e:"📈", n:"排行榜", t:"财富榜"},
+        {id:"welfare", e:"🎁", n:"福利", t:"每日奖励"},
+      ];
+
+      return `
+        <div class="top">
+          <div class="left">
+            <div class="avatar"></div>
+            <div class="title">
+              <b>${s.playerName}</b>
+              <span>称号：${s.title}</span>
+            </div>
+          </div>
+          <div class="pill" data-act="openTimeline"><b>第 ${s.week} 周</b><span style="color:var(--muted)">· 第 ${s.year} 年 · ${season.icon} ${season.name}</span></div>
+          <div style="display:flex; gap:8px">
+            <div class="icon" data-act="help">❓</div>
+            <div class="icon" data-act="save">💾</div>
+            <div class="icon" data-act="settings">⚙️</div>
+          </div>
+        </div>
+
+        ${alert ? `
+          <div class="card sec" style="border-color:rgba(255,176,32,.35); background:linear-gradient(180deg, rgba(255,176,32,.16), rgba(18,26,43,.35));" data-act="hideAlert">
+            <div class="pad">
+              <b style="font-weight:950; font-size:13px">${alert.t}</b>
+              <div class="subline">${alert.d} <span style="float:right; font-family:var(--mono); opacity:.9">点击隐藏</span></div>
+            </div>
+          </div>
+        ` : ""}
+
+        <div class="card sec">
+          <div class="hero">
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:10px">
+              <div>
+                <div style="font-size:12px; color:var(--muted)">现金</div>
+                <div class="cash mono">${fmtMoney(s.cash)}</div>
+                <div class="subline">总资产：${fmtMoney(s.assets)} · 年龄 ${s.age} · 声望 ${s.rep}/100</div>
+              </div>
+              <div class="pill" data-act="openPlayer">玩家详情</div>
+            </div>
+
+            <div class="chips">
+              <div class="chip" data-act="openNet">
+                <span style="opacity:.9">净现金流</span>
+                <b class="${netClass} mono">${(net>=0?"+ ":"- ")+fmtMoney(Math.abs(net)).replace("¥ ","¥ ")}</b>
+              </div>
+              <div class="chip" data-act="openStatus">
+                <span style="opacity:.9">压力</span>
+                <b class="warn mono">${s.stress}/100</b>
+              </div>
+              <div class="chip" data-act="openStatus">
+                <span style="opacity:.9">健康</span>
+                <b class="${s.health<=35?'bad':(s.health<=60?'warn':'good')} mono">${s.health}/100</b>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${world}
+
+        <div class="card sec">
+          <div class="head"><h2>快捷入口</h2><div class="hint">点进去有内容页</div></div>
+          <div class="grid">
+            ${quickNav.map(x=>`
+              <div class="nav" data-act="nav" data-to="${x.id}">
+                ${x.red?'<div class="dot"></div>':''}
+                <div class="e">${x.e}</div>
+                <div class="n">${x.n}</div>
+                <div class="t">${x.t}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="card sec">
+          <div class="head"><h2>店铺快览</h2><div class="hint">点击进入详情</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${s.shops.slice(0,3).map(sp=>{
+              const p = sp.lastProfit ?? sp.baseProfit;
+              return `
+                <div class="row" data-act="openShop" data-id="${sp.id}">
+                  <div style="min-width:0">
+                    <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${sp.name}</b>
+                    <span>★ ${sp.rating.toFixed(1)} · 堂食/外卖 ${(sp.dineIn*100).toFixed(0)}% / ${(sp.delivery*100).toFixed(0)}%</span>
+                  </div>
+                  <div class="mono ${p>=0?'good':'bad'}" style="font-weight:950">
+                    ${(p>=0?"+ ":"- ")+fmtMoney(Math.abs(p)).replace("¥ ","¥ ")}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    // ===== Generic Page Shell =====
+    function pageShell(title, subtitle, body){
+      const season = seasonOfWeek(state.week);
+      const back = `<div class="icon" data-act="back">←</div>`;
+      const right = `<div class="pill" data-act="openTimeline"><b>第 ${state.week} 周</b><span style="color:var(--muted)">· ${season.icon} ${season.name}</span></div>`;
+      return `
+        <div class="top">
+          <div class="left">
+            ${back}
+            <div class="title">
+              <b>${title}</b>
+              <span>${subtitle||""}</span>
+            </div>
+          </div>
+          ${right}
+          <div style="display:flex; gap:8px">
+            <div class="icon" data-act="home">🏠</div>
+          </div>
+        </div>
+        ${body}
+      `;
+    }
+
+    // ===== Pages =====
+    function renderShops(){
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>你的店铺</h2><div class="hint">${state.shops.length} 家</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${state.shops.map(sp=>{
+              const p = sp.lastProfit ?? sp.baseProfit;
+              return `
+                <div class="row" data-act="openShop" data-id="${sp.id}">
+                  <div style="min-width:0">
+                    <b style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${sp.name}</b>
+                    <span>★ ${sp.rating.toFixed(1)} · 本周利润预估</span>
+                  </div>
+                  <div class="mono ${p>=0?'good':'bad'}" style="font-weight:950">
+                    ${(p>=0?"+ ":"- ")+fmtMoney(Math.abs(p)).replace("¥ ","¥ ")}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <div class="card sec">
+          <div class="head"><h2>常用操作（Demo）</h2><div class="hint">占位</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <button class="btn secondary" data-act="toast" data-msg="开新店流程（Demo）">开新店</button>
+            <button class="btn secondary" data-act="toast" data-msg="续约/装修（Demo）">续约 / 装修</button>
+          </div>
+        </div>
+      `;
+      return pageShell("店铺", "经营概览与详情", body);
+    }
+
+    function renderShopDetail(id){
+      const sp = state.shops.find(x=>x.id===id);
+      if(!sp) return pageShell("店铺", "未找到", `<div class="card sec"><div class="pad">未找到该店铺。</div></div>`);
+      const p = sp.lastProfit ?? sp.baseProfit;
+      const dine = Math.round(p * sp.dineIn);
+      const delv = Math.round(p * sp.delivery);
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>${sp.name}</h2><div class="hint">详情页（Demo）</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><div><b>评分</b><span>影响招聘/客流（占位）</span></div><div class="mono" style="font-weight:950">★ ${sp.rating.toFixed(1)}</div></div>
+            <div class="row"><div><b>本周利润</b><span>含世界事件倍率（若有）</span></div><div class="mono ${p>=0?'good':'bad'}" style="font-weight:950">${(p>=0?"+ ":"- ")+fmtMoney(Math.abs(p)).replace("¥ ","¥ ")}</div></div>
+            <div class="row"><div><b>堂食/外卖占比</b><span>${(sp.dineIn*100).toFixed(0)}% / ${(sp.delivery*100).toFixed(0)}%</span></div><div class="mono" style="font-weight:950">—</div></div>
+          </div>
+        </div>
+
+        <div class="card sec">
+          <div class="head"><h2>经营小结（简化）</h2><div class="hint">占位</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><div><b>堂食贡献</b><span>按占比估算</span></div><div class="mono">${fmtMoney(dine)}</div></div>
+            <div class="row"><div><b>外卖贡献</b><span>按占比估算</span></div><div class="mono">${fmtMoney(delv)}</div></div>
+            <button class="btn secondary" data-act="toast" data-msg="升级设备（Demo）">升级设备</button>
+            <button class="btn secondary" data-act="toast" data-msg="调整菜单（Demo）">调整菜单</button>
+          </div>
+        </div>
+      `;
+      return pageShell("店铺详情", "返回可继续推进周数", body);
+    }
+
+    function renderStaff(){
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>员工列表</h2><div class="hint">${state.employees.length} 人</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${state.employees.map(p=>`
+              <div class="row" data-act="openEmp" data-id="${p.id}">
+                <div>
+                  <b>${p.name} · ${p.role}</b>
+                  <span>状态：${p.mood} · 风险：${p.risk}</span>
+                </div>
+                <div class="mono" style="font-weight:950">${fmtMoney(p.wage).replace("¥ ","¥ ")}/月</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        <div class="card sec">
+          <div class="head"><h2>管理操作（Demo）</h2><div class="hint">占位</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <button class="btn secondary" data-act="toast" data-msg="招聘流程（Demo）">招聘</button>
+            <button class="btn secondary" data-act="toast" data-msg="加薪/排班（Demo）">加薪 / 排班</button>
+          </div>
+        </div>
+      `;
+      return pageShell("员工", "离职风险与工资", body);
+    }
+
+    function renderEmpDetail(id){
+      const p = state.employees.find(x=>x.id===id);
+      if(!p) return pageShell("员工", "未找到", `<div class="card sec"><div class="pad">未找到该员工。</div></div>`);
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>${p.name}</h2><div class="hint">${p.role}</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><div><b>心情</b><span>影响效率/离职（占位）</span></div><div class="mono">${p.mood}</div></div>
+            <div class="row"><div><b>工资</b><span>每周结算折算（占位）</span></div><div class="mono">${fmtMoney(p.wage).replace("¥ ","¥ ")}/月</div></div>
+            <div class="row"><div><b>风险</b><span>触发事件可能性（占位）</span></div><div class="mono ${p.risk!=='—'?'warn':''}">${p.risk}</div></div>
+            <button class="btn secondary" data-act="toast" data-msg="谈话/安抚（Demo）">谈话/安抚</button>
+            <button class="btn secondary" data-act="toast" data-msg="调整排班（Demo）">调整排班</button>
+          </div>
+        </div>
+      `;
+      return pageShell("员工详情", "处理风险与效率", body);
+    }
+
+    function renderDelivery(){
+      const d = state.delivery;
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>外卖概览</h2><div class="hint">渠道管理</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><div><b>是否开通</b><span>影响订单结构</span></div><div class="mono ${d.enabled?'good':'bad'}" style="font-weight:950">${d.enabled?'已开通':'未开通'}</div></div>
+            <div class="row"><div><b>平台抽成</b><span>（Demo 固定）</span></div><div class="mono">${Math.round(d.feeRate*100)}%</div></div>
+            <div class="row"><div><b>推广预算</b><span>（Demo 可调）</span></div><div class="mono">${fmtMoney(d.budget).replace("¥ ","¥ ")}</div></div>
+            <div class="row"><div><b>本周订单</b><span>（Demo 固定）</span></div><div class="mono">${d.orders}</div></div>
+
+            <button class="btn secondary" data-act="toggleDelivery">${d.enabled?'暂停外卖':'开通外卖'}</button>
+            <button class="btn secondary" data-act="adjustBudget">调整推广预算</button>
+          </div>
+        </div>
+      `;
+      return pageShell("外卖", "预算与抽成", body);
+    }
+
+    function renderLocation(){
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>可选门面</h2><div class="hint">刷新（Demo）</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${state.locations.map(l=>`
+              <div class="row" data-act="openLoc" data-id="${l.id}">
+                <div>
+                  <b>${l.name}</b>
+                  <span>人流：${l.foot} · 竞争：${l.competition}</span>
+                </div>
+                <div class="mono" style="font-weight:950">${fmtMoney(l.rent).replace("¥ ","¥ ")}/月</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        <div class="card sec">
+          <div class="head"><h2>提示</h2><div class="hint">占位</div></div>
+          <div class="pad">
+            <div style="color:var(--muted); font-size:12px; line-height:1.5">
+              真实版本建议展示：押金、预计客流、同类竞争、目标客群匹配度等，并在“开店/搬店”时做资金校验与事件触发。
+            </div>
+          </div>
+        </div>
+      `;
+      return pageShell("选址/门面", "选店址与租金", body);
+    }
+
+    function renderLocDetail(id){
+      const l = state.locations.find(x=>x.id===id);
+      if(!l) return pageShell("门面详情", "未找到", `<div class="card sec"><div class="pad">未找到门面。</div></div>`);
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>${l.name}</h2><div class="hint">详情页（Demo）</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><div><b>租金</b><span>每周摊销（占位）</span></div><div class="mono">${fmtMoney(l.rent).replace("¥ ","¥ ")}/月</div></div>
+            <div class="row"><div><b>人流</b><span>影响堂食</span></div><div class="mono">${l.foot}</div></div>
+            <div class="row"><div><b>竞争</b><span>影响客流与评分</span></div><div class="mono">${l.competition}</div></div>
+            <button class="btn secondary" data-act="toast" data-msg="签约/搬店（Demo）">签约/搬店</button>
+          </div>
+        </div>
+      `;
+      return pageShell("门面详情", "评估成本与机会", body);
+    }
+
+    function renderWorld(){
+      const w = state.world;
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>当前世界事件</h2><div class="hint">${w.active?'激活中':'无'}</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${w.active ? `
+              <div class="row"><div><b>${w.title}</b><span>${w.meta}</span></div><div class="mono warn">剩余 ${w.remaining} 周</div></div>
+              <div class="row"><div><b>主要影响</b><span>倍率叠加（Demo）</span></div><div class="mono">${w.tags.map(x=>x.t).join(" / ")}</div></div>
+              <button class="btn secondary" data-act="toast" data-msg="查看规则细节（Demo）">查看规则细节</button>
+            ` : `
+              <div style="color:var(--muted); font-size:12px; line-height:1.5">
+                暂无激活的世界事件。真实版本可展示：事件池、触发条件、持续周数、叠加/互斥规则。
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+      return pageShell("世界事件", "不占用每周交互事件名额", body);
+    }
+
+    function renderAchievements(){
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>成就</h2><div class="hint">领取奖励（Demo）</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${state.achievements.map(a=>{
+              const pct = Math.round(a.prog*100);
+              return `
+                <div class="row">
+                  <div style="min-width:0">
+                    <b>${a.name}</b>
+                    <span>${a.desc} · ${pct}%</span>
+                  </div>
+                  <div>
+                    ${a.claim ? `<span class="pill" style="font-weight:950" data-act="claim" data-id="${a.id}">领取</span>` : `<span class="mono">${pct}%</span>`}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+      return pageShell("成就", "进度与领取", body);
+    }
+
+    function renderRank(){
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>排行榜</h2><div class="hint">财富榜（Demo）</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${state.leaderboard.map(x=>`
+              <div class="row">
+                <div><b>#${x.rank} ${x.name}</b><span>现金</span></div>
+                <div class="mono" style="font-weight:950">${fmtMoney(x.cash)}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+      return pageShell("排行榜", "看看你的位置", body);
+    }
+
+    function renderWelfare(){
+      const w = state.welfare;
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>福利</h2><div class="hint">每日奖励（Demo）</div></div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><div><b>每日登录奖励</b><span>现金 +¥1,000</span></div><div class="mono">${w.dailyClaimed?"已领取":"未领取"}</div></div>
+            <button class="btn ${w.dailyClaimed?'secondary':''}" data-act="claimDaily" ${w.dailyClaimed?'disabled':''}>${w.dailyClaimed?'今日已领取':'领取今日奖励'}</button>
+            <div class="row"><div><b>跳过券</b><span>用于跳过动画/事件（占位）</span></div><div class="mono">${w.skipTickets} 张</div></div>
+            <button class="btn secondary" data-act="toast" data-msg="观看广告获得奖励（Demo）">看广告领奖励</button>
+          </div>
+        </div>
+      `;
+      return pageShell("福利", "轻量变现入口占位", body);
+    }
+
+    // ===== Event (简版：选择后立刻结算并回 Home) =====
+    function renderEvent(ev){
+      const season = seasonOfWeek(state.week);
+      const body = `
+        <div class="card sec">
+          <div class="head"><h2>第 ${state.week} 周事件</h2><div class="hint">${season.icon} ${season.name}</div></div>
+          <div class="pad" style="color:rgba(232,238,252,.92); font-size:13px; line-height:1.55">
+            <b style="font-weight:950; font-size:16px">${ev.title}</b>
+            <div style="margin-top:8px; color:var(--muted)">${ev.body}</div>
+          </div>
+          <div class="pad" style="display:flex; flex-direction:column; gap:10px">
+            ${ev.choices.map(ch=>{
+              const e=ch.effects;
+              const fx = [
+                `<i class="${e.cashEvent>=0?'g':'b'}">${e.cashEvent>=0?'+':'-'}现金 ${fmtMoney(Math.abs(e.cashEvent)).replace('¥ ','¥ ')}</i>`,
+                `<i class="${e.stress<=0?'g':'w'}">${e.stress>=0?'+':'-'}压力 ${Math.abs(e.stress)}</i>`,
+              ];
+              if(e.health!==0) fx.push(`<i class="${e.health>=0?'g':'w'}">${e.health>=0?'+':'-'}健康 ${Math.abs(e.health)}</i>`);
+              if(e.rep!==0) fx.push(`<i class="${e.rep>=0?'g':'b'}">${e.rep>=0?'+':'-'}声望 ${Math.abs(e.rep)}</i>`);
+              return `
+                <div class="row choice" data-act="choose" data-cid="${ch.id}">
+                  <div style="min-width:0">
+                    <b>${ch.id}. ${ch.title}</b>
+                    <span>${ch.desc}</span>
+                    <div class="fx">${fx.join("")}</div>
+                  </div>
+                  <div class="mono" style="font-weight:950">→</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <div class="card sec">
+          <div class="head"><h2>说明</h2><div class="hint">v2 为短文件做简化</div></div>
+          <div class="pad" style="color:var(--muted); font-size:12px; line-height:1.55">
+            v2 把“结算动画”简化为：选择后立刻结算并回到主画面（但仍更新：周数、现金、状态、时间线、世界事件剩余周数）。
+          </div>
+          <div class="pad"><button class="btn secondary" data-act="back">返回主画面</button></div>
+        </div>
+      `;
+      return pageShell("本周事件", "选择一项推进 1 周", body);
+    }
+
+    function settle(ev, ch){
+      // Shop profit with world multiplier
+      let shopProfit = 0;
+      state.shops.forEach(sp=>{
+        const base = sp.baseProfit;
+        const dine = base * sp.dineIn;
+        const delv = base * sp.delivery;
+        const dineAdj = state.world?.active ? dine * state.world.dineInMul : dine;
+        const delvAdj = state.world?.active ? delv * state.world.deliveryMul : delv;
+        const fixed = state.world?.active ? -180 : 0;
+        const p = Math.round(dineAdj + delvAdj + fixed);
+        sp.lastProfit = p;
+        shopProfit += p;
+      });
+
+      const eventCash = ch.effects.cashEvent;
+      const net = Math.round(shopProfit - state.livingCost - state.loanPay + eventCash);
+      state._lastNet = net;
+
+      // Apply state changes
+      state.cash = Math.round(state.cash + net);
+      state.assets = Math.round(state.assets + net * 0.35);
+      state.stress = clamp(Math.round(state.stress + ch.effects.stress), 0, 100);
+      state.health = clamp(Math.round(state.health + ch.effects.health), 0, 100);
+      state.rep = clamp(Math.round(state.rep + ch.effects.rep), 0, 100);
+
+      if(state.stress >= 90) state.stressMaxWeeks = Math.min(4, state.stressMaxWeeks + 1);
+      else state.stressMaxWeeks = Math.max(0, state.stressMaxWeeks - 1);
+
+      // time
+      state.week += 1;
+      if(state.week % 52 === 1 && state.week !== 1) state.year += 1;
+      if(state.week % 52 === 1) state.age += 1;
+
+      // world event remaining
+      if(state.world?.active){
+        state.world.remaining -= 1;
+        if(state.world.remaining <= 0) state.world.active = false;
+      }
+
+      // timeline
+      state.timeline.push({ week: state.week - 1, title: `${ev.title}（选 ${ch.id}）`, net });
+
+      toast(`已结算：净现金流 ${(net>=0?'+':'-')}${fmtMoney(Math.abs(net)).replace('¥ ','¥ ')}`);
+    }
+
+    // ===== Render dispatcher =====
+    function render(){
+      $("#footer").style.display = (router.view==="home") ? "flex" : "none";
+
+      let html = "";
+      if(router.view==="home") html = renderHome();
+      else if(router.view==="shops") html = renderShops();
+      else if(router.view==="shop") html = renderShopDetail(router.params.id);
+      else if(router.view==="staff") html = renderStaff();
+      else if(router.view==="emp") html = renderEmpDetail(router.params.id);
+      else if(router.view==="delivery") html = renderDelivery();
+      else if(router.view==="location") html = renderLocation();
+      else if(router.view==="loc") html = renderLocDetail(router.params.id);
+      else if(router.view==="world") html = renderWorld();
+      else if(router.view==="ach") html = renderAchievements();
+      else if(router.view==="rank") html = renderRank();
+      else if(router.view==="welfare") html = renderWelfare();
+      else if(router.view==="event") html = renderEvent(router.params.ev);
+      else html = renderHome();
+
+      app.innerHTML = html;
+    }
+
+    // ===== Actions (event delegation) =====
+    document.addEventListener('click', (e)=>{
+      const el = e.target.closest('[data-act]');
+      if(!el) return;
+      const act = el.getAttribute('data-act');
+
+      if(act==="home" || act==="back"){ setView("home"); return; }
+      if(act==="toast"){ toast(el.getAttribute('data-msg')||"Demo"); return; }
+      if(act==="help"){ toast("帮助（Demo）"); return; }
+      if(act==="save"){ toast("存档/读档（Demo）"); return; }
+      if(act==="settings"){ toast("设置（Demo）"); return; }
+
+      if(act==="openTimeline"){
+        const items = state.timeline.slice(-10).reverse().map(it=>{
+          const t = (it.net>=0?"+ ":"- ") + fmtMoney(Math.abs(it.net)).replace("¥ ","¥ ");
+          return `<div class="row"><div><b>第 ${it.week} 周</b><span>${it.title}</span></div><div class="mono ${it.net>=0?'good':'bad'}" style="font-weight:950">${t}</div></div>`;
+        }).join("") || `<div class="row"><span>暂无记录</span><b class="mono">—</b></div>`;
+        openSheet("时间线（最近 10 周）", items);
+        return;
+      }
+
+      if(act==="openNet"){
+        const lastNet = state._lastNet ?? 6820;
+        const shopProfit = state.shops.reduce((a,x)=>a+(x.lastProfit ?? x.baseProfit),0);
+        openSheet("本周净现金流构成", `
+          <div class="row"><span>店铺利润汇总</span><b class="mono">${fmtMoney(shopProfit)}</b></div>
+          <div class="row"><span>生活/家庭支出</span><b class="mono bad">- ${fmtMoney(state.livingCost).replace("¥ ","¥ ")}</b></div>
+          <div class="row"><span>贷款还款</span><b class="mono bad">- ${fmtMoney(state.loanPay).replace("¥ ","¥ ")}</b></div>
+          <div class="row"><span><b>合计</b></span><b class="mono ${lastNet>=0?'good':'bad'}">${(lastNet>=0?"+ ":"- ")+fmtMoney(Math.abs(lastNet)).replace("¥ ","¥ ")}</b></div>
+        `);
+        return;
+      }
+
+      if(act==="openStatus"){
+        openSheet("状态详情（占位）", `
+          <div class="row"><span>压力</span><b class="mono warn">${state.stress}/100</b></div>
+          <div class="row"><span>健康</span><b class="mono ${state.health<=35?'bad':(state.health<=60?'warn':'good')}">${state.health}/100</b></div>
+          <div class="row"><span>声望</span><b class="mono">${state.rep}/100</b></div>
+          <div style="color:var(--muted); font-size:12px; line-height:1.5">
+            真实版本：这里可展示“满值持续周数、疾病风险、声望带来的额度/招聘加成”等。
+          </div>
+        `);
+        return;
+      }
+
+      if(act==="openPlayer"){
+        openSheet("玩家详情（占位）", `
+          <div class="row"><span>玩家</span><b>${state.playerName}</b></div>
+          <div class="row"><span>称号</span><b>${state.title}</b></div>
+          <div class="row"><span>年龄</span><b class="mono">${state.age}</b></div>
+          <div class="row"><span>现金</span><b class="mono">${fmtMoney(state.cash)}</b></div>
+          <div class="row"><span>总资产</span><b class="mono">${fmtMoney(state.assets)}</b></div>
+        `);
+        return;
+      }
+
+      if(act==="hideAlert"){ toast("已隐藏提示（Demo）"); return; }
+
+      if(act==="nav"){
+        const to = el.getAttribute('data-to');
+        const map = {shops:"shops", staff:"staff", delivery:"delivery", location:"location", world:"world", ach:"ach", rank:"rank", welfare:"welfare"};
+        setView(map[to] || "home");
+        return;
+      }
+      if(act==="openShop"){ setView("shop", {id: el.getAttribute('data-id')}); return; }
+      if(act==="openEmp"){ setView("emp", {id: el.getAttribute('data-id')}); return; }
+      if(act==="toggleDelivery"){ state.delivery.enabled = !state.delivery.enabled; toast(state.delivery.enabled ? "已开通外卖" : "已暂停外卖"); setView("delivery"); return; }
+      if(act==="adjustBudget"){
+        openSheet("调整推广预算（Demo）",
+          `<div class="row"><span>当前预算</span><b class="mono">${fmtMoney(state.delivery.budget).replace("¥ ","¥ ")}</b></div>
+           <button class="btn secondary" data-act="budget" data-d="50">+50</button>
+           <button class="btn secondary" data-act="budget" data-d="-50">-50</button>
+           <div style="color:var(--muted); font-size:12px; line-height:1.5">这里可以换成 slider，并影响订单/利润模型。</div>`
+        );
+        return;
+      }
+      if(act==="budget"){
+        const d = parseInt(el.getAttribute('data-d'),10) || 0;
+        state.delivery.budget = clamp(state.delivery.budget + d, 0, 2000);
+        toast("预算：" + fmtMoney(state.delivery.budget).replace("¥ ","¥ "));
+        closeSheet();
+        setView("delivery");
+        return;
+      }
+      if(act==="openLoc"){ setView("loc", {id: el.getAttribute('data-id')}); return; }
+      if(act==="claim"){
+        const id = el.getAttribute('data-id');
+        const a = state.achievements.find(x=>x.id===id);
+        if(a && a.claim){ a.claim=false; toast("已领取奖励（Demo）"); setView("ach"); }
+        return;
+      }
+      if(act==="claimDaily"){
+        if(state.welfare.dailyClaimed) return;
+        state.welfare.dailyClaimed = true;
+        state.cash += 1000;
+        toast("领取成功：现金 +¥1,000");
+        setView("welfare");
+        return;
+      }
+      if(act==="openWorld"){ setView("world"); return; }
+
+      if(act==="choose"){
+        const ev = router.params.ev;
+        const cid = el.getAttribute('data-cid');
+        const ch = ev.choices.find(x=>x.id===cid);
+        settle(ev, ch);
+        setView("home");
+        return;
+      }
+    });
+
+    // Footer buttons
+    $("#btnTimeline").addEventListener('click', ()=>openSheet("时间线（最近 10 周）",
+      state.timeline.slice(-10).reverse().map(it=>{
+        const t = (it.net>=0?"+ ":"- ") + fmtMoney(Math.abs(it.net)).replace("¥ ","¥ ");
+        return `<div class="row"><div><b>第 ${it.week} 周</b><span>${it.title}</span></div><div class="mono ${it.net>=0?'good':'bad'}" style="font-weight:950">${t}</div></div>`;
+      }).join("") || `<div class="row"><span>暂无记录</span><b class="mono">—</b></div>`
+    ));
+    $("#btnStart").addEventListener('click', ()=>{
+      const ev = eventsPool[Math.floor(Math.random()*eventsPool.length)];
+      setView("event", {ev});
+    });
+
+    // Init
+    render();
+  </script>
+</body>
+</html>
